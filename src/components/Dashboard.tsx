@@ -102,7 +102,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="header-left">
           <h1>Dashboard</h1>
           <select className="account-selector">
-            <option>All Accounts</option>
+            <option>Bruhbruh Accounts</option>
             <option>Checking Account</option>
             <option>Savings Account</option>
           </select>
@@ -148,7 +148,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               />
               <div className="future-trends-label">Future Trends</div>
             </div>
-            
+
             {/* Transaction Timeline */}
             <div className="transaction-timeline">
               <h3>Recent Purchases</h3>
@@ -159,9 +159,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                     <div className="timeline-info">
                       <div className="timeline-name">{transaction.name}</div>
                       <div className="timeline-date">
-                        {new Date(transaction.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric' 
+                        {new Date(transaction.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
                         })}
                       </div>
                     </div>
@@ -189,12 +189,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   cutout: '60%',
                 }}
               />
-               <button 
-              className="view-transactions-btn"
-              onClick={handleViewTransactions}
-            >
-              View All Transactions 📋
-            </button>
+              <button
+                className="view-transactions-btn"
+                onClick={handleViewTransactions}
+              >
+                View All Transactions 📋
+              </button>
               <div className="category-labels">
                 <div className="category-item">
                   <div className="color-dot" style={{ backgroundColor: '#2D5A27' }}></div>
@@ -210,9 +210,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
               </div>
             </div>
-           
+
           </div>
-          
+
           <div className="best-cards">
             <h3>Best Card for Next Purchase</h3>
             <div className="cards-list">
