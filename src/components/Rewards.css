@@ -1,0 +1,160 @@
+.rewards {
+  flex: 1;
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.rewards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.rewards-title {
+  color: #7ED321;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+}
+
+.rewards-content {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.debit-card-section h2 {
+  color: #333;
+  margin: 0 0 30px 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.rewards-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.main-card {
+  flex-shrink: 0;
+}
+
+.card-visual.main {
+  width: 280px;
+  height: 175px;
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #ff6b6b 100%);
+  border-radius: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.card-visual.main:hover {
+  transform: perspective(1000px) rotateY(0deg) translateY(-5px);
+}
+
+.card-chip {
+  width: 30px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.card-number {
+  font-size: 18px;
+  letter-spacing: 2px;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.card-logo {
+  align-self: flex-end;
+  font-weight: bold;
+  font-size: 16px;
+  font-style: italic;
+}
+
+.reward-cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reward-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  border-left: 4px solid #7ED321;
+  transition: all 0.3s ease;
+}
+
+.reward-item:hover {
+  background: #f0f9ff;
+  transform: translateX(5px);
+  box-shadow: 0 4px 15px rgba(126, 211, 33, 0.1);
+}
+
+.reward-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #7ED321;
+  margin-bottom: 8px;
+}
+
+.reward-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .rewards-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+  
+  .card-visual.main {
+    width: 250px;
+    height: 155px;
+    transform: none;
+  }
+  
+  .card-visual.main:hover {
+    transform: translateY(-5px);
+  }
+  
+  .reward-cards {
+    width: 100%;
+  }
+}
