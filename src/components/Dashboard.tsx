@@ -102,7 +102,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="header-left">
           <h1>Dashboard</h1>
           <select className="account-selector">
-            <option>Bruhbruh Accounts</option>
+            <option>All Accounts</option>
             <option>Checking Account</option>
             <option>Savings Account</option>
           </select>
