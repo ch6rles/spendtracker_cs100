@@ -68,11 +68,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   // Category Distribution Data
   const categoryData = {
-    labels: ['Food & Drink', 'Shopping', 'Bills'],
+    labels: ['Bills', 'Shopping', 'Food & Drink'],
     datasets: [
       {
-        data: [35, 30, 35],
-        backgroundColor: ['#2D5A27', '#7ED321', '#4A90E2'],
+        data: [50, 15, 45],
+        backgroundColor: ['#3674B5', '#66BB51', '#0B4F1A'],
         borderWidth: 0,
       },
     ],
@@ -198,7 +198,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="category-labels">
                 <div className="category-item">
                   <div className="color-dot" style={{ backgroundColor: '#2D5A27' }}></div>
-                  <span>Food & drink</span>
+                  <span>food & drink</span>
                 </div>
                 <div className="category-item">
                   <div className="color-dot" style={{ backgroundColor: '#7ED321' }}></div>
