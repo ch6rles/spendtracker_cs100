@@ -45,7 +45,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         label: 'Income',
         data: [3, 4, 3, 4, 5, 8, 10, 15, 18, 19, 20, 20],
         borderColor: '#4A90E2',
-        backgroundColor: 'rgba(74, 144, 226, 0.1)',
+        backgroundColor: 'rgba(36, 97, 168, 0.1)',
         tension: 0.4,
       },
       {
@@ -71,7 +71,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     labels: ['Bills', 'Shopping', 'Food & Drink'],
     datasets: [
       {
-        data: [50, 15, 45],
+        data: [50, 10, 40],
         backgroundColor: ['#3674B5', '#66BB51', '#0B4F1A'],
         borderWidth: 0,
       },
