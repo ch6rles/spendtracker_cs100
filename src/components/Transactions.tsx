@@ -33,7 +33,7 @@ export function Transactions() {
           <Bell size={20} />
           <div className="user-info">
             <User size={20} />
-            <span>Last, First</span>
+            <span>Nhien, Pham</span>
           </div>
         </div>
       </header>
@@ -72,7 +72,7 @@ export function Transactions() {
             <div className="column">Amount</div>
             <div className="column">Date</div>
           </div>
-          
+
           <div className="table-body">
             {filteredTransactions.map((transaction) => {
               const amount = formatAmount(transaction.amount)
