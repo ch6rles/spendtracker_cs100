@@ -19,21 +19,15 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
   return (
     <aside className="sidebar">
-      
+
       <div className="sidebar-header">
         <div className="error-badge">
-            <img src="./src/assets/404notfound.png" alt="404 Not Found" />
+          <img src="./src/assets/404notfound.png" alt="404 Not Found" />
         </div>
       </div>
 
-      <div className="search-container">
-        <div className="search-box">
-          <Search size={16} />
-          <input type="text" placeholder="Search" />
-        </div>
-      </div>
 
-      
+
 
       <nav className="sidebar-nav">
         {menuItems.map(({ id, icon: Icon, label }) => (

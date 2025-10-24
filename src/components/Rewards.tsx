@@ -25,7 +25,7 @@ export function Rewards() {
           <Bell size={20} />
           <div className="user-info">
             <User size={20} />
-            <span>Last, First</span>
+            <span>Nhien, Pham</span>
           </div>
         </div>
       </header>
@@ -33,7 +33,7 @@ export function Rewards() {
       <div className="rewards-content">
         <div className="debit-card-section">
           <h2>Debit Visa Card</h2>
-          
+
           <div className="rewards-layout">
             <div className="main-card">
               <div className="card-visual main">
@@ -42,7 +42,7 @@ export function Rewards() {
                 <div className="card-logo">VISA</div>
               </div>
             </div>
-            
+
             <div className="reward-cards">
               {rewardCards.map((card, index) => (
                 <div key={index} className="reward-item">

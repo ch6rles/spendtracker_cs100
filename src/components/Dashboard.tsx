@@ -58,8 +58,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       {
         label: 'Future Trends',
         data: [null, null, null, null, null, null, null, null, null, 19, 20, 21],
-        borderColor: '#50C878',
-        backgroundColor: 'rgba(80, 200, 120, 0.1)',
+        borderColor: '#e41111ff',
+        backgroundColor: 'rgba(236, 15, 15, 0.1)',
         borderDash: [5, 5],
         tension: 0.4,
       },
@@ -99,8 +99,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
+        <h1>Dashboard</h1>
         <div className="header-left">
-          <h1>Dashboard</h1>
           <select className="account-selector">
             <option>All Accounts</option>
             <option>Checking Account</option>
@@ -111,7 +111,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <Bell size={20} />
           <div className="user-info">
             <User size={20} />
-            <span>Last, First</span>
+            <span>Nhien, Pham</span>
           </div>
         </div>
       </header>
