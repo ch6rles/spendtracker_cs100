@@ -215,6 +215,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
             </div>
           </div>
+
+
+          
           <div className="accounts-section">
             <h3>ACCOUNTS</h3>
             <div className="sync-info">
