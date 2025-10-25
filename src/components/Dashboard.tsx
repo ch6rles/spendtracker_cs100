@@ -10,7 +10,7 @@ import {
   ArcElement,
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
-import { Bell, User } from 'lucide-react'
+import { Bell, User, ChevronDown } from 'lucide-react'
 import { getRecentTransactionIcons } from '../data/transactions'
 import './Dashboard.css'
 
@@ -78,6 +78,50 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     ],
   }
 
+
+
+
+
+  // mock account data
+  const accounts = [
+    {
+      name: 'Checking',
+      balance: '$2,847.23',
+      icon: '🏦',
+      type: 'checking',
+      color: '#6366f1'
+    },
+    {
+      name: 'Credit Cards',
+      balance: '$1,234.56',
+      icon: '💳',
+      type: 'credit',
+      color: '#ec4899'
+    },
+    {
+      name: 'Net Cash',
+      balance: '$15,847.90',
+      icon: '💰',
+      type: 'cash',
+      color: '#10b981'
+    },
+    {
+      name: 'Savings',
+      balance: '$8,542.11',
+      icon: '🏦',
+      type: 'savings',
+      color: '#f59e0b'
+    },
+    {
+      name: 'Investments',
+      balance: '$24,891.47',
+      icon: '📈',
+      type: 'investment',
+      color: '#8b5cf6'
+    }
+  ];
+
+
   const bestCards = [
     {
       name: 'Estimate rewards on Whole Foods (3x points)',
@@ -101,6 +145,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <header className="dashboard-header">
         <h1>Dashboard</h1>
         <div className="header-left">
+
           <select className="account-selector">
             <option>All Accounts</option>
             <option>Checking Account</option>
@@ -168,6 +213,29 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+          <div className="accounts-section">
+            <h3>ACCOUNTS</h3>
+            <div className="sync-info">
+              <span>🔄 about 5 hours ago | Sync now</span>
+            </div>
+
+            <div className="accounts-list">
+              {accounts.map((account, index) => (
+                <div key={index} className="account-item">
+                  <div className="account-info">
+                    <div className="account-icon" style={{ backgroundColor: account.color }}>
+                      {account.icon}
+                    </div>
+                    <span className="account-name">{account.name}</span>
+                  </div>
+                  <div className="account-balance-section">
+                    <span className="account-balance">{account.balance}</span>
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

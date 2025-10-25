@@ -1,7 +1,7 @@
 .rewards {
   flex: 1;
   padding: 20px;
-  background-color: #88dd27;
+  background-color: #e8e8e8;
   min-height: 100vh;
 }
 
@@ -143,17 +143,17 @@
     align-items: center;
     gap: 30px;
   }
-  
+
   .card-visual.main {
     width: 250px;
     height: 155px;
     transform: none;
   }
-  
+
   .card-visual.main:hover {
     transform: translateY(-5px);
   }
-  
+
   .reward-cards {
     width: 100%;
   }
