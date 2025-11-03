@@ -217,7 +217,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
 
 
+<<<<<<< HEAD
           
+=======
+>>>>>>> Nhien
           <div className="accounts-section">
             <h3>ACCOUNTS</h3>
             <div className="sync-info">

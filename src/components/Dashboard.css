@@ -1,7 +1,7 @@
 .dashboard {
   flex: 1;
   padding: 28px;
-  background-color: rgba(255, 255, 255, 0.634);
+  background-color: #e9f0ed;
   min-height: 100vh;
 }
 
