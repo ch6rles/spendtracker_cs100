@@ -22,7 +22,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
       <div className="sidebar-header">
         <div className="error-badge">
-          <img src="./src/assets/404notfound.png" alt="404 Not Found" />
+          <h1>Spend Track</h1>
         </div>
       </div>
 

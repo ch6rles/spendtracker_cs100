@@ -220,7 +220,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <div className="accounts-section">
             <h3>ACCOUNTS</h3>
             <div className="sync-info">
-              <span>🔄 about 5 hours ago | Sync now</span>
+              <span>🔄 about 5 hours ago | </span>
+              <button>
+                <span>Sync Now</span>
+              </button>
             </div>
 
             <div className="accounts-list">

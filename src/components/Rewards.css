@@ -1,11 +1,7 @@
 .rewards {
   flex: 1;
   padding: 20px;
-<<<<<<< HEAD
-  background-color: #e8e8e8;
-=======
   background-color: #e9f0ed;
->>>>>>> Nhien
   min-height: 100vh;
 }
 
@@ -254,24 +250,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-<<<<<<< HEAD
-    gap: 30px;
-  }
-
-  .card-visual.main {
-    width: 250px;
-    height: 155px;
-    transform: none;
-  }
-
-  .card-visual.main:hover {
-    transform: translateY(-5px);
-  }
-
-  .reward-cards {
-    width: 100%;
-  }
-=======
   }
 }
 
@@ -297,5 +275,4 @@
   .card-rewards-group {
     padding: 20px;
   }
->>>>>>> Nhien
 }
