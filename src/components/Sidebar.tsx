@@ -1,4 +1,4 @@
-import { Home, CreditCard, Gift, User, Settings, Search } from 'lucide-react'
+import { Home, CreditCard, Gift, User, Settings} from 'lucide-react'
 import './Sidebar.css'
 
 type ActiveTab = 'dashboard' | 'transactions' | 'rewards' | 'account' | 'settings'

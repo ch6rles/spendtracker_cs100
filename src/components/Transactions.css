@@ -1,7 +1,7 @@
 .transactions {
   flex: 1;
   padding: 20px;
-  background-color: 114A12;
+  background-color: #e9f0ed;
   min-height: 100vh;
 }
 
@@ -186,12 +186,13 @@
 }
 
 @media (max-width: 1024px) {
+
   .table-header,
   .table-row {
     grid-template-columns: 1fr 2fr 1fr;
     gap: 16px;
   }
-  
+
   .date-info {
     display: none;
   }
@@ -203,21 +204,21 @@
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .search-container {
     max-width: none;
   }
-  
+
   .sort-container {
     margin-left: 0;
   }
-  
+
   .table-header,
   .table-row {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-  
+
   .transaction-id {
     display: none;
   }
