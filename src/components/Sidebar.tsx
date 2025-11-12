@@ -19,15 +19,9 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
   return (
     <aside className="sidebar">
-
       <div className="sidebar-header">
-        <div className="error-badge">
-          <h1>Spend Track</h1>
-        </div>
+        <div className="brand">BILLIONAIRE BANK</div>
       </div>
-
-
-
 
       <nav className="sidebar-nav">
         {menuItems.map(({ id, icon: Icon, label }) => (
@@ -41,6 +35,11 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </button>
         ))}
       </nav>
+
+
+      <div className="sidebar-footer" aria-hidden="true">
+        <img src="./src/assets/404NOTFOUND.png" alt="404 NOT FOUND" className="footer-404" />
+      </div>
     </aside>
   )
 }
