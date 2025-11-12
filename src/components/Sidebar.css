@@ -1,3 +1,6 @@
+/* import new font for brand */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap');
+
 .sidebar {
   width: 15vw;
   height: auto;
@@ -14,6 +17,48 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 30px;
+}
+
+
+.sidebar-header .brand {
+  font-family: 'Poppins', "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 15px;
+  /* increased size */
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #ffffff;
+  /* ensure contrast on dark sidebar */
+  padding: 16px;
+  text-align: center;
+}
+
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-404 {
+  width: 120px;
+  /* bigger size */
+  height: auto;
+  opacity: 0.85;
+  filter: grayscale(10%);
+}
+
+
+/* Responsive tweak if sidebar becomes narrow */
+@media (max-width: 480px) {
+  .footer-404 {
+    width: 80px;
+  }
+
+  .sidebar-header .brand {
+    font-size: 20px;
+  }
 }
 
 .logo {

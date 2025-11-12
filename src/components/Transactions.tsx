@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Search, Bell, User } from 'lucide-react'
 import { transactions } from '../data/transactions'
 import './Transactions.css'

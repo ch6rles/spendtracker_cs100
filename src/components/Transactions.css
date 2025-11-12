@@ -54,6 +54,11 @@
 .search-container {
   flex: 0;
   max-width: 400px;
+  display: flex;
+  margin-top: 20px;
+  /* moved lower a bit */
+  align-items: center;
+
 }
 
 .search-box {
@@ -201,12 +206,14 @@
 @media (max-width: 768px) {
   .transactions-controls {
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
     align-items: stretch;
   }
 
   .search-container {
     max-width: none;
+    margin-top: 0;
+    /* reset on small screens where items stack */
   }
 
   .sort-container {
