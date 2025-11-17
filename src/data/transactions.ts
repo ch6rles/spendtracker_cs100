@@ -1,3 +1,4 @@
+
 export interface Transaction {
   id: string
   type: 'transfer' | 'payment' | 'deposit'

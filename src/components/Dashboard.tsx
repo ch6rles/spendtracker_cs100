@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,7 +12,8 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
-import { getRecentTransactionIcons } from '../data/transactions'
+import { fetchDashboardData } from '../services/dashboardApi'
+import type { DashboardData } from '../services/dashboardApi'
 import './Dashboard.css'
 
 ChartJS.register(
@@ -30,6 +32,25 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onNavigate }: DashboardProps) {
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      setLoading(true)
+      try {
+        const data = await fetchDashboardData()
+        setDashboardData(data)
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadDashboardData()
+  }, [])
+
   const handleViewTransactions = () => {
     console.log('handleViewTransactions called, onNavigate:', onNavigate);
     if (onNavigate) {
@@ -37,50 +58,171 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  // Income Analysis Chart Data
-  const incomeData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Income',
-        data: [3, 4, 3, 4, 5, 8, 10, 15, 18, 19, 20, 20],
-        borderColor: '#4A90E2',
-        backgroundColor: 'rgba(36, 97, 168, 0.1)',
-        tension: 0.4,
-      },
-      {
-        label: 'Spending',
-        data: [2, 3, 2, 3, 4, 6, 8, 12, 16, 17, 18, 19],
-        borderColor: '#7ED321',
-        backgroundColor: 'rgba(126, 211, 33, 0.1)',
-        tension: 0.4,
-      },
-      {
-        label: 'Future Trends',
-        data: [null, null, null, null, null, null, null, null, null, 19, 20, 21],
-        borderColor: '#e41111ff',
-        backgroundColor: 'rgba(236, 15, 15, 0.1)',
-        borderDash: [5, 5],
-        tension: 0.4,
-      },
-    ],
+  // Convert monthly spending data to chart format
+  const getIncomeData = () => {
+    if (!dashboardData?.monthlySpending) {
+      return {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [
+          {
+            label: 'Spending',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            borderColor: '#7ED321',
+            backgroundColor: 'rgba(126, 211, 33, 0.1)',
+            tension: 0.4,
+          },
+          {
+            label: 'Future Trends',
+            data: [null, null, null, null, null, null, null, null, null, 0, 0, 0],
+            borderColor: '#e41111ff',
+            backgroundColor: 'rgba(236, 15, 15, 0.1)',
+            borderDash: [5, 5],
+            tension: 0.4,
+          },
+        ],
+      }
+    }
+
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const spendingData = new Array(12).fill(0)
+    
+    dashboardData.monthlySpending.forEach(monthData => {
+      const month = new Date(monthData.month).getMonth()
+      spendingData[month] = monthData.totalSpent
+    })
+
+    // Calculate future trends based on recent spending patterns
+    const currentMonth = new Date().getMonth() // November = 10 (0-indexed)
+    const futureData = new Array(12).fill(null)
+    
+    // Get last 6 months of data for better trend calculation
+    const recentMonths = dashboardData.monthlySpending
+      .filter(monthData => monthData.totalSpent > 0)
+      .sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime()) // Sort by most recent first
+      .slice(0, 6)
+    
+    if (recentMonths.length >= 3) {
+      // Calculate average spending and trend
+      const avgSpending = recentMonths.reduce((sum, month) => sum + month.totalSpent, 0) / recentMonths.length
+      
+      // Calculate trend using linear regression approach
+      let trendSum = 0
+      for (let i = 0; i < recentMonths.length - 1; i++) {
+        const monthDiff = recentMonths[i].totalSpent - recentMonths[i + 1].totalSpent
+        trendSum += monthDiff
+      }
+      const monthlyTrend = trendSum / (recentMonths.length - 1)
+      
+      // Add seasonal adjustment (higher spending in Nov-Dec for holidays)
+      const seasonalMultipliers = [1.0, 0.9, 0.95, 1.0, 1.05, 1.0, 1.0, 1.0, 1.0, 1.1, 1.25, 1.3]
+      
+      // Start future trend from current month's actual data (if available)
+      const currentMonthData = spendingData[currentMonth]
+      if (currentMonthData > 0) {
+        futureData[currentMonth] = currentMonthData
+      }
+      
+      // Project future months (extend to the right)
+      for (let i = 1; i <= 4; i++) {
+        const futureMonth = (currentMonth + i) % 12
+        const basePrediction = avgSpending + (monthlyTrend * i * 0.7) // Dampen the trend
+        const seasonalAdjustment = seasonalMultipliers[futureMonth]
+        futureData[futureMonth] = Math.max(0, basePrediction * seasonalAdjustment)
+      }
+    }
+
+    return {
+      labels: monthLabels,
+      datasets: [
+        {
+          label: 'Spending',
+          data: spendingData,
+          borderColor: '#7ED321',
+          backgroundColor: 'rgba(126, 211, 33, 0.1)',
+          tension: 0.4,
+        },
+        {
+          label: 'Future Trends',
+          data: futureData,
+          borderColor: '#e41111ff',
+          backgroundColor: 'rgba(236, 15, 15, 0.1)',
+          borderDash: [5, 5],
+          tension: 0.4,
+        },
+      ],
+    }
   }
 
-  // Category Distribution Data
-  const categoryData = {
-    labels: ['Bills', 'Shopping', 'Food & Drink'],
-    datasets: [
-      {
-        data: [50, 10, 40],
-        backgroundColor: ['#3674B5', '#66BB51', '#0B4F1A'],
-        borderWidth: 0,
-      },
-    ],
+  // Convert breakdown data to category chart format
+  const getCategoryData = () => {
+    if (!dashboardData?.breakdown) {
+      return {
+        labels: ['Food & Groceries', 'Shopping', 'Other'],
+        datasets: [
+          {
+            data: [0, 0, 0],
+            backgroundColor: ['#3674B5', '#66BB51', '#0B4F1A'],
+            borderWidth: 0,
+          },
+        ],
+      }
+    }
+
+    const breakdown = dashboardData.breakdown
+    const labels = Object.keys(breakdown).filter(key => breakdown[key as keyof typeof breakdown] > 0)
+    const data = labels.map(label => breakdown[label as keyof typeof breakdown])
+    
+    // Use different colors for different categories
+    const colors = ['#3674B5', '#66BB51', '#0B4F1A', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57']
+    
+    return {
+      labels: labels.length > 0 ? labels : ['No Data'],
+      datasets: [
+        {
+          data: data.length > 0 ? data : [1],
+          backgroundColor: colors.slice(0, labels.length || 1),
+          borderWidth: 0,
+        },
+      ],
+    }
   }
 
+  // Get best card data
+  const getBestCards = () => {
+    if (!dashboardData?.bestCardRecommendation) {
+      return [{
+        name: 'No recommendation available',
+        reward: '$0.00',
+        color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
+      }]
+    }
 
+    const recommendation = dashboardData.bestCardRecommendation
+    return [{
+      name: `${recommendation.card.cardName} - ${recommendation.recommendationReason}`,
+      reward: `$${recommendation.projectedAnnualRewards.toFixed(2)}`,
+      color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
+    }]
+  }
 
+  const incomeData = getIncomeData()
+  const categoryData = getCategoryData()
+  const bestCards = getBestCards()
 
+  // Get recent transactions for timeline (fallback to empty array if no recent data)
+  const getRecentTransactions = () => {
+    if (!dashboardData?.recent || dashboardData.recent.length === 0) {
+      return [
+        { icon: '🛒', name: 'Wholefoods', date: '2025-10-16' },
+        { icon: '☕', name: 'Starbucks', date: '2025-10-16' },
+        { icon: '⛽', name: 'Gas', date: '2025-10-12' },
+        { icon: '💰', name: 'Salary', date: '2025-10-10' },
+        { icon: '🛒', name: 'Trader Joe', date: '2025-10-09' },
+        { icon: '🧋', name: 'Bobashop', date: '2025-10-05' }
+      ]
+    }
+    return dashboardData.recent.slice(0, 6)
+  }
 
   // mock account data
   const accounts = [
@@ -121,24 +263,15 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   ];
 
-
-  const bestCards = [
-    {
-      name: 'Estimate rewards on Whole Foods (3x points)',
-      reward: '$5.55',
-      color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
-    },
-    {
-      name: 'Estimate rewards on Whole Foods (2.5x points)',
-      reward: '$4.95',
-      color: 'linear-gradient(135deg, #4ECDC4, #45B7D1)',
-    },
-    {
-      name: 'Estimate rewards on Whole Foods (1.8x points)',
-      reward: '$3.45',
-      color: 'linear-gradient(135deg, #96CEB4, #FECA57)',
-    },
-  ]
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          <div>Loading dashboard data...</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="dashboard">
@@ -198,7 +331,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <div className="transaction-timeline">
               <h3>Recent Purchases</h3>
               <div className="timeline-items">
-                {getRecentTransactionIcons(6).map((transaction, index) => (
+                {getRecentTransactions().map((transaction: any, index: number) => (
                   <div key={index} className="timeline-item">
                     <div className="timeline-icon">{transaction.icon}</div>
                     <div className="timeline-info">
