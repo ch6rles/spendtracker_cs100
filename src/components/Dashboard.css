@@ -1,7 +1,7 @@
 .dashboard {
   flex: 1;
   padding: var(--spacing-lg);
-  background: #47525d; /* Let the main app background show through */
+  background: #a9b4be; /* Let the main app background show through */
   min-height: 100vh;
 }
 
