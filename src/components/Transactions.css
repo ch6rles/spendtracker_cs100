@@ -90,7 +90,6 @@
 .search-box input:focus {
   background: rgba(0, 123, 255, 0.05);
   border-radius: 4px;
-  color: #000;
 }
 
 .search-box input::placeholder {
