@@ -4,7 +4,7 @@
   width: 280px;
   min-width: 280px;
   height: 100vh;
-  background: linear-gradient(128deg, #006da4 2%, #008083 10%, #004d74 50%, #f78104 120%, #008083 10%);
+  background: linear-gradient(337deg, #006da4 2%, #008083 10%, #004d74 50%, #f78104 110%);
   padding: var(--spacing-lg);
   box-sizing: border-box;
   display: flex;

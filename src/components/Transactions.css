@@ -1,7 +1,7 @@
 .transactions {
   flex: 1;
   padding: var(--spacing-lg);
-  background: #a9b4be; 
+  background: #001629;
   min-height: 100vh;
 }
 
@@ -14,10 +14,14 @@
   padding: var(--spacing-lg);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-light);
+  background: rgb(1, 30, 55);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(66, 66, 66, 0.873);
 }
 
 .header-left h1 {
-  color: var(--text-primary);
+  color: var(--warm-gray);
   margin: 0;
   font-size: 28px;
   font-weight: 600;
@@ -27,13 +31,14 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
+  color: var(--warm-gray);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  color: var(--text-secondary);
+  color: var(--warm-gray);
   font-weight: 500;
 }
 
@@ -75,7 +80,7 @@
 }
 
 .loading-container h3 {
-  color: var(--text-primary);
+  color: var(--warm-gray);
   margin-bottom: var(--spacing-sm);
 }
 
