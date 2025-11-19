@@ -178,20 +178,82 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const categoryData = getCategoryData()
   const bestCards = getBestCards()
 
-  // Get recent transactions for timeline (fallback to empty array if no recent data)
+  // Helper function to get appropriate icon for transaction categories
+  const getCategoryIcon = (category: string, description: string): string => {
+    const lowerCategory = category.toLowerCase();
+    const lowerDescription = description.toLowerCase();
+    
+    // Check description for more specific matching
+    if (lowerDescription.includes('grocery') || lowerDescription.includes('supermarket') || lowerDescription.includes('wholefoods') || lowerDescription.includes('trader')) {
+      return '🛒';
+    }
+    if (lowerDescription.includes('restaurant') || lowerDescription.includes('sushi') || lowerDescription.includes('pizza') || lowerDescription.includes('cafe')) {
+      return '🍽️';
+    }
+    if (lowerDescription.includes('coffee') || lowerDescription.includes('starbucks') || lowerDescription.includes('cafe')) {
+      return '☕';
+    }
+    if (lowerDescription.includes('gas') || lowerDescription.includes('fuel') || lowerDescription.includes('station')) {
+      return '⛽';
+    }
+    if (lowerDescription.includes('electric') || lowerDescription.includes('utility') || lowerDescription.includes('bill')) {
+      return '💡';
+    }
+    if (lowerDescription.includes('flight') || lowerDescription.includes('airline') || lowerDescription.includes('booking')) {
+      return '✈️';
+    }
+    if (lowerDescription.includes('streaming') || lowerDescription.includes('netflix') || lowerDescription.includes('spotify')) {
+      return '📺';
+    }
+    if (lowerDescription.includes('salary') || lowerDescription.includes('payroll') || lowerDescription.includes('interest')) {
+      return '💰';
+    }
+    if (lowerDescription.includes('bobashop') || lowerDescription.includes('boba') || lowerDescription.includes('tea')) {
+      return '🧋';
+    }
+    
+    // Fallback to category-based icons
+    switch (lowerCategory) {
+      case 'food & groceries':
+      case 'food':
+      case 'groceries':
+        return '🛒';
+      case 'transportation':
+      case 'transport':
+        return '🚗';
+      case 'entertainment':
+        return '🎬';
+      case 'income':
+        return '💰';
+      case 'housing & utilities':
+      case 'utilities':
+        return '🏠';
+      default:
+        return '💳';
+    }
+  };
+
+  // Get recent transactions for timeline using API data
   const getRecentTransactions = () => {
     if (!dashboardData?.recent || dashboardData.recent.length === 0) {
       return [
-        { icon: '🛒', name: 'Wholefoods', date: '2025-10-16' },
-        { icon: '☕', name: 'Starbucks', date: '2025-10-16' },
-        { icon: '⛽', name: 'Gas', date: '2025-10-12' },
-        { icon: '💰', name: 'Salary', date: '2025-10-10' },
-        { icon: '🛒', name: 'Trader Joe', date: '2025-10-09' },
-        { icon: '🧋', name: 'Bobashop', date: '2025-10-05' }
-      ]
+        { icon: '🛒', name: 'Wholefoods', date: '2025-10-16', amount: -45.50 },
+        { icon: '☕', name: 'Starbucks', date: '2025-10-16', amount: -6.75 },
+        { icon: '⛽', name: 'Gas', date: '2025-10-12', amount: -62.30 },
+        { icon: '💰', name: 'Salary', date: '2025-10-10', amount: 3200.00 },
+        { icon: '🛒', name: 'Trader Joe', date: '2025-10-09', amount: -34.25 },
+        { icon: '🧋', name: 'Bobashop', date: '2025-10-05', amount: -8.50 }
+      ];
     }
-    return dashboardData.recent.slice(0, 6)
-  }
+    
+    return dashboardData.recent.slice(0, 6).map(transaction => ({
+      icon: getCategoryIcon(transaction.category, transaction.description),
+      name: transaction.description,
+      date: transaction.date,
+      amount: transaction.amount,
+      id: transaction.id
+    }));
+  };
 
   // mock account data
   const accounts = [
@@ -326,15 +388,22 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <h3>Recent Purchases</h3>
               <div className="timeline-items">
                 {getRecentTransactions().map((transaction: any, index: number) => (
-                  <div key={index} className="timeline-item">
+                  <div key={transaction.id || index} className="timeline-item">
                     <div className="timeline-icon">{transaction.icon}</div>
                     <div className="timeline-info">
                       <div className="timeline-name">{transaction.name}</div>
-                      <div className="timeline-date">
-                        {new Date(transaction.date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                      <div className="timeline-meta">
+                        <div className="timeline-date">
+                          {new Date(transaction.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        {transaction.amount && (
+                          <div className={`timeline-amount ${transaction.amount >= 0 ? 'positive' : 'negative'}`}>
+                            {transaction.amount >= 0 ? '+' : ''}${Math.abs(transaction.amount).toFixed(2)}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

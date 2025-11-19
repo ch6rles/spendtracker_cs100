@@ -1,7 +1,16 @@
 const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
+interface RecentTransaction {
+  id: string;
+  accountId: string | null;
+  date: string;
+  description: string;
+  amount: number;
+  category: string;
+}
+
 export interface DashboardData {
-  recent: any[];
+  recent: RecentTransaction[];
   breakdown: {
     'Food & Groceries': number;
     'Transportation': number;
