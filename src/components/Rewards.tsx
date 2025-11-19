@@ -1,72 +1,83 @@
+import { useState, useEffect } from 'react'
 import { Bell, User } from 'lucide-react'
+import { fetchRewardsData } from '../services/rewardsApi'
+import type { RewardsResponse } from '../services/rewardsApi'
 import './Rewards.css'
 
 export function Rewards() {
-  const rewardCards = [
-    {
-      cardName: 'Chase Sapphire Preferred',
-      cardType: 'Visa Signature',
-      cardColor: 'linear-gradient(135deg, #1a1f71, #0b0b45)',
-      cardLogo: 'VISA',
-      lastFourDigits: '4123',
-      rewards: [
-        {
-          name: 'Grocery Shopping at Whole Foods (3x points)',
-          reward: '$5.55',
-          color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
-          category: 'Grocery'
-        },
-        {
-          name: 'Gas Station Shell (5% cashback)',
-          reward: '$3.27',
-          color: 'linear-gradient(135deg, #96CEB4, #FECA57)',
-          category: 'Gas'
-        }
-      ]
-    },
-    {
-      cardName: 'American Express Gold',
-      cardType: 'American Express',
-      cardColor: 'linear-gradient(135deg, #ffd700, #b8860b)',
-      cardLogo: 'AMEX',
-      lastFourDigits: '3456',
-      rewards: [
-        {
-          name: 'Amazon Online Shopping (2x points)',
-          reward: '$4.98',
-          color: 'linear-gradient(135deg, #4ECDC4, #45B7D1)',
-          category: 'Online Shopping'
-        },
-        {
-          name: 'Starbucks Coffee (4x points)',
-          reward: '$2.80',
-          color: 'linear-gradient(135deg, #FF9A9E, #FAD0C4)',
-          category: 'Dining'
-        }
-      ]
-    },
-    {
-      cardName: 'Capital One Venture',
-      cardType: 'Mastercard',
-      cardColor: 'linear-gradient(135deg, #2d5a27, #4a7c59)',
-      cardLogo: 'MASTERCARD',
-      lastFourDigits: '7890',
-      rewards: [
-        {
-          name: 'Target Shopping (2.5x points)',
-          reward: '$3.75',
-          color: 'linear-gradient(135deg, #A1C4FD, #C2E9FB)',
-          category: 'Retail'
-        },
-        {
-          name: 'Netflix Subscription (3x points)',
-          reward: '$1.50',
-          color: 'linear-gradient(135deg, #FF6B6B, #556270)',
-          category: 'Entertainment'
-        }
-      ]
+  const [rewardsData, setRewardsData] = useState<RewardsResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadRewards = async () => {
+      setLoading(true)
+      try {
+        const data = await fetchRewardsData()
+        setRewardsData(data)
+      } catch (error) {
+        console.error('Failed to load rewards:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+    
+    loadRewards()
+  }, [])
+
+  const getCardTypeDisplay = (issuer: string) => {
+    switch (issuer.toLowerCase()) {
+      case 'chase':
+        return { type: 'Visa Signature', logo: 'VISA' }
+      case 'american express':
+        return { type: 'American Express', logo: 'AMEX' }
+      case 'capital one':
+        return { type: 'Mastercard', logo: 'MASTERCARD' }
+      default:
+        return { type: 'Credit Card', logo: 'CARD' }
+    }
+  }
+
+  const getCardColor = (issuer: string) => {
+    switch (issuer.toLowerCase()) {
+      case 'chase':
+        return 'linear-gradient(135deg, #1a1f71, #0b0b45)'
+      case 'american express':
+        return 'linear-gradient(135deg, #ffd700, #b8860b)'
+      case 'capital one':
+        return 'linear-gradient(135deg, #2d5a27, #4a7c59)'
+      default:
+        return 'linear-gradient(135deg, #333, #666)'
+    }
+  }
+
+  const generateCardNumber = (cardId: string) => {
+    const numbers: { [key: string]: string } = {
+      'csp': '4123',
+      'bcp': '3456',
+      'cov': '7890'
+    }
+    return numbers[cardId] || '0000'
+  }
+
+  if (loading) {
+    return (
+      <div className="rewards">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          <div>Loading rewards data...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!rewardsData) {
+    return (
+      <div className="rewards">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          <div>No rewards data available</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="rewards">
@@ -85,33 +96,54 @@ export function Rewards() {
 
       <div className="rewards-content">
         <div className="cards-section">
-          {rewardCards.map((card, index) => (
-            <div key={index} className="card-rewards-group">
-              <div className="card-section">
-                <h2>{card.cardName}</h2>
-                <div className="card-visual" style={{ background: card.cardColor }}>
-                  <div className="card-chip"></div>
-                  <div className="card-number">**** **** **** {card.lastFourDigits}</div>
-                  <div className="card-type">{card.cardType}</div>
-                  <div className="card-logo">{card.cardLogo}</div>
+          {rewardsData.recommendedCards.map((rewardCard, index) => {
+            const cardDisplay = getCardTypeDisplay(rewardCard.card.issuer)
+            const cardColor = getCardColor(rewardCard.card.issuer)
+            const lastFourDigits = generateCardNumber(rewardCard.card.id)
+            
+            // Generate rewards based on categories or use projected annual rewards
+            const rewards = Object.keys(rewardCard.rewardsByCategory).length > 0 
+              ? Object.entries(rewardCard.rewardsByCategory).map(([category, amount]) => ({
+                  name: `${category} (${(rewardCard.card.categoryRewardRates[category.toLowerCase()] * 100 || rewardCard.card.baseRewardRate * 100).toFixed(1)}x points)`,
+                  reward: `$${amount.toFixed(2)}`,
+                  color: index % 2 === 0 ? 'linear-gradient(135deg, #FF6B6B, #4ECDC4)' : 'linear-gradient(135deg, #96CEB4, #FECA57)',
+                  category: category
+                }))
+              : [{
+                  name: `${rewardCard.card.cardName} - ${rewardCard.recommendationReason}`,
+                  reward: `$${rewardCard.projectedAnnualRewards.toFixed(2)}`,
+                  color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
+                  category: 'General'
+                }]
+
+            return (
+              <div key={index} className="card-rewards-group">
+                <div className="card-section">
+                  <h2>{rewardCard.card.cardName}</h2>
+                  <div className="card-visual" style={{ background: cardColor }}>
+                    <div className="card-chip"></div>
+                    <div className="card-number">**** **** **** {lastFourDigits}</div>
+                    <div className="card-type">{cardDisplay.type}</div>
+                    <div className="card-logo">{cardDisplay.logo}</div>
+                  </div>
+                </div>
+
+                <div className="reward-cards">
+                  {rewards.map((reward, rewardIndex) => (
+                    <div
+                      key={rewardIndex}
+                      className="reward-item"
+                      style={{ '--card-color': reward.color } as React.CSSProperties}
+                    >
+                      <div className="reward-amount">{reward.reward}</div>
+                      <div className="reward-description">{reward.name}</div>
+                      <div className="reward-category">{reward.category}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              <div className="reward-cards">
-                {card.rewards.map((reward, rewardIndex) => (
-                  <div
-                    key={rewardIndex}
-                    className="reward-item"
-                    style={{ '--card-color': reward.color } as React.CSSProperties}
-                  >
-                    <div className="reward-amount">{reward.reward}</div>
-                    <div className="reward-description">{reward.name}</div>
-                    <div className="reward-category">{reward.category}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

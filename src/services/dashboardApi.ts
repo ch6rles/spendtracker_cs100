@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
 export interface DashboardData {
@@ -44,13 +42,25 @@ export interface DashboardData {
 export const fetchDashboardData = async (): Promise<DashboardData> => {
   try {
     console.log('Fetching dashboard data from API...');
-    const response = await axios.get(`${API_BASE_URL}/dashboard`, {
+    
+    const response = await fetch(`${API_BASE_URL}/dashboard`, {
+      method: 'GET',
       headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
     });
-    console.log('Dashboard data received:', response.data);
-    return response.data;
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Dashboard data received:', data);
+    return data;
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
     console.log('Using fallback data due to API error');

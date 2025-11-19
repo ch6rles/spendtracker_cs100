@@ -71,14 +71,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             backgroundColor: 'rgba(126, 211, 33, 0.1)',
             tension: 0.4,
           },
-          {
-            label: 'Future Trends',
-            data: [null, null, null, null, null, null, null, null, null, 0, 0, 0],
-            borderColor: '#e41111ff',
-            backgroundColor: 'rgba(236, 15, 15, 0.1)',
-            borderDash: [5, 5],
-            tension: 0.4,
-          },
         ],
       }
     }
@@ -91,46 +83,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       spendingData[month] = monthData.totalSpent
     })
 
-    // Calculate future trends based on recent spending patterns
-    const currentMonth = new Date().getMonth() // November = 10 (0-indexed)
-    const futureData = new Array(12).fill(null)
-    
-    // Get last 6 months of data for better trend calculation
-    const recentMonths = dashboardData.monthlySpending
-      .filter(monthData => monthData.totalSpent > 0)
-      .sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime()) // Sort by most recent first
-      .slice(0, 6)
-    
-    if (recentMonths.length >= 3) {
-      // Calculate average spending and trend
-      const avgSpending = recentMonths.reduce((sum, month) => sum + month.totalSpent, 0) / recentMonths.length
-      
-      // Calculate trend using linear regression approach
-      let trendSum = 0
-      for (let i = 0; i < recentMonths.length - 1; i++) {
-        const monthDiff = recentMonths[i].totalSpent - recentMonths[i + 1].totalSpent
-        trendSum += monthDiff
-      }
-      const monthlyTrend = trendSum / (recentMonths.length - 1)
-      
-      // Add seasonal adjustment (higher spending in Nov-Dec for holidays)
-      const seasonalMultipliers = [1.0, 0.9, 0.95, 1.0, 1.05, 1.0, 1.0, 1.0, 1.0, 1.1, 1.25, 1.3]
-      
-      // Start future trend from current month's actual data (if available)
-      const currentMonthData = spendingData[currentMonth]
-      if (currentMonthData > 0) {
-        futureData[currentMonth] = currentMonthData
-      }
-      
-      // Project future months (extend to the right)
-      for (let i = 1; i <= 4; i++) {
-        const futureMonth = (currentMonth + i) % 12
-        const basePrediction = avgSpending + (monthlyTrend * i * 0.7) // Dampen the trend
-        const seasonalAdjustment = seasonalMultipliers[futureMonth]
-        futureData[futureMonth] = Math.max(0, basePrediction * seasonalAdjustment)
-      }
-    }
-
     return {
       labels: monthLabels,
       datasets: [
@@ -139,14 +91,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           data: spendingData,
           borderColor: '#7ED321',
           backgroundColor: 'rgba(126, 211, 33, 0.1)',
-          tension: 0.4,
-        },
-        {
-          label: 'Future Trends',
-          data: futureData,
-          borderColor: '#e41111ff',
-          backgroundColor: 'rgba(236, 15, 15, 0.1)',
-          borderDash: [5, 5],
           tension: 0.4,
         },
       ],
@@ -324,7 +268,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   },
                 }}
               />
-              <div className="future-trends-label">Future Trends</div>
             </div>
 
             {/* Transaction Timeline */}
