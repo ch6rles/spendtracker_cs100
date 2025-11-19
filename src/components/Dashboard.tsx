@@ -266,15 +266,27 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="category-labels">
                 <div className="category-item">
                   <div className="color-dot" style={{ backgroundColor: '#2D5A27' }}></div>
-                  <span>food & drink</span>
+                  <span>Housing & Utilities</span>
                 </div>
                 <div className="category-item">
                   <div className="color-dot" style={{ backgroundColor: '#7ED321' }}></div>
-                  <span>shopping</span>
+                  <span>Transportation</span>
                 </div>
                 <div className="category-item">
                   <div className="color-dot" style={{ backgroundColor: '#4A90E2' }}></div>
-                  <span>bills</span>
+                  <span>Foods & Groceries</span>
+                </div>
+                <div className="category-item">
+                  <div className="color-dot" style={{ backgroundColor: '#D0021B' }}></div>
+                  <span>Entertainment</span>
+                </div>
+                <div className="category-item">
+                  <div className="color-dot" style={{ backgroundColor: '#F5A623' }}></div>
+                  <span>Shopping</span>
+                </div>
+                <div className="category-item">
+                  <div className="color-dot" style={{ backgroundColor: '#9B9B9B' }}></div>
+                  <span>Other</span>
                 </div>
               </div>
             </div>
