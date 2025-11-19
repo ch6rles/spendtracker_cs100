@@ -1,7 +1,7 @@
 .dashboard {
   flex: 1;
   padding: var(--spacing-lg);
-  background: transparent; /* Let the main app background show through */
+  background: #47525d; /* Let the main app background show through */
   min-height: 100vh;
 }
 
@@ -440,7 +440,7 @@
   margin-top: var(--spacing-md);
   display: inline-block;
   z-index: 1;
-  background: var(--gradient-primary);
+  background: linear-gradient(333deg, #006da4 2%, #008083 10%, #004d74 50%, #f78104 120%, #008083 10%);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
