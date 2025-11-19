@@ -74,18 +74,52 @@ export function Transactions() {
 
   const formatAmount = (amount: number) => {
     const sign = amount >= 0 ? '+' : ''
-    const color = amount >= 0 ? '#7ED321' : '#ff4757'
+    const color = amount >= 0 ? 'var(--primary-green)' : 'var(--danger-red)'
     return {
       text: `${sign}$${Math.abs(amount).toFixed(amount >= 0 ? 0 : (amount % 1 === 0 ? 0 : 2))}`,
       color
     }
   }
 
+  const getCategoryColor = (category: string): string => {
+    const categoryColors: { [key: string]: string } = {
+      'Food & Groceries': 'var(--primary-green)',
+      'food': 'var(--primary-green)',
+      'groceries': 'var(--primary-green)',
+      'Transportation': 'var(--primary-blue)',
+      'transport': 'var(--primary-blue)',
+      'gas': 'var(--primary-blue)',
+      'Housing & Utilities': 'var(--accent-orange)',
+      'housing': 'var(--accent-orange)',
+      'utilities': 'var(--accent-orange)',
+      'Entertainment': 'var(--accent-purple)',
+      'entertainment': 'var(--accent-purple)',
+      'Healthcare': 'var(--danger-red)',
+      'health': 'var(--danger-red)',
+      'Education': '#8B5CF6',
+      'education': '#8B5CF6',
+      'Shopping': '#EC4899',
+      'shopping': '#EC4899',
+      'Transfer': 'var(--medium-gray)',
+      'transfer': 'var(--medium-gray)',
+      'bank': 'var(--medium-gray)',
+      'Deposit': 'var(--primary-green)',
+      'deposit': 'var(--primary-green)',
+      'income': 'var(--primary-green)',
+      'Other': 'var(--text-muted)',
+      'default': 'var(--text-muted)'
+    };
+    
+    return categoryColors[category.toLowerCase()] || categoryColors['default'];
+  }
+
   if (loading) {
     return (
       <div className="transactions">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-          <div>Loading transactions...</div>
+        <div className="loading-container">
+          <div className="loading-spinner">💰</div>
+          <h3>Loading your transactions...</h3>
+          <p>Organizing your financial data</p>
         </div>
       </div>
     )
@@ -205,19 +239,36 @@ export function Transactions() {
           <div className="table-body">
             {sortedTransactions.map((transaction: Transaction) => {
               const amount = formatAmount(transaction.amount)
+              const categoryColor = getCategoryColor(transaction.category)
               return (
                 <div key={transaction.id} className="table-row">
                   <div className="column transaction-id">
-                    {transaction.id}
+                    <div className="transaction-id-wrapper">
+                      <div 
+                        className="category-indicator" 
+                        style={{ backgroundColor: categoryColor }}
+                        title={transaction.category}
+                      />
+                      <span className="id-text">{transaction.id}</span>
+                    </div>
                   </div>
                   <div className="column payment-name">
                     <div className="payment-info">
                       <span className="payment-icon">{transaction.icon || '💳'}</span>
-                      <span className="payment-text">{transaction.name || transaction.description}</span>
+                      <div className="payment-details">
+                        <span className="payment-text">{transaction.name || transaction.description}</span>
+                        <span className="category-tag" style={{ backgroundColor: `${categoryColor}20`, color: categoryColor }}>
+                          {transaction.category}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="column amount" style={{ color: amount.color }}>
-                    {amount.text}
+                  <div className="column amount">
+                    <div className="amount-wrapper" style={{ color: amount.color }}>
+                      <span className="currency">$</span>
+                      <span className="value">{Math.abs(transaction.amount).toFixed(2)}</span>
+                      <span className="sign">{amount.text.startsWith('+') ? '↑' : '↓'}</span>
+                    </div>
                   </div>
                   <div className="column date">
                     <div className="date-info">

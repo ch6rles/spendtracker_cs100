@@ -35,6 +35,31 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Helper function for time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 18) return 'Good afternoon'
+    return 'Good evening'
+  }
+
+  // Calculate quick stats
+  const getQuickStats = () => {
+    if (!dashboardData) return null
+    
+    const thisMonthSpending = dashboardData.monthlySpending?.[0]?.totalSpent || 0
+    const lastMonthSpending = dashboardData.monthlySpending?.[1]?.totalSpent || 0
+    const change = thisMonthSpending - lastMonthSpending
+    const changePercent = lastMonthSpending ? ((change / lastMonthSpending) * 100) : 0
+    
+    return {
+      thisMonth: thisMonthSpending,
+      change: change,
+      changePercent: changePercent,
+      isPositive: change >= 0
+    }
+  }
+
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true)
@@ -237,6 +262,32 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </div>
       </header>
+
+      {/* Welcome Section */}
+      <div className="welcome-section">
+        <div className="welcome-content">
+          <h2>{getTimeBasedGreeting()}, Nhien! 👋</h2>
+          <p>Here's your financial snapshot for today</p>
+        </div>
+        {getQuickStats() && (
+          <div className="quick-stats">
+            <div className="stat-card">
+              <div className="stat-value">${getQuickStats()?.thisMonth.toFixed(2)}</div>
+              <div className="stat-label">Spent this month</div>
+            </div>
+            <div className="stat-card">
+              <div className={`stat-value ${getQuickStats()?.isPositive ? 'negative' : 'positive'}`}>
+                {getQuickStats()?.isPositive ? '+' : ''}${Math.abs(getQuickStats()?.change || 0).toFixed(2)}
+              </div>
+              <div className="stat-label">vs last month</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{accounts.length}</div>
+              <div className="stat-label">Active accounts</div>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="dashboard-content">
         <div className="chart-section">
