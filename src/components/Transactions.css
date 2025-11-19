@@ -1,7 +1,7 @@
 .transactions {
   flex: 1;
   padding: 20px;
-  background-color: 114A12;
+  background-color: #e9f0ed;
   min-height: 100vh;
 }
 
@@ -52,8 +52,10 @@
 }
 
 .search-container {
-  flex: 0;
-  max-width: 400px;
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
 }
 
 .search-box {
@@ -64,6 +66,14 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   background: white;
+  min-width: 300px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-box button:hover {
+  color: #333;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
 }
 
 .search-box input {
@@ -71,6 +81,15 @@
   outline: none;
   flex: 1;
   font-size: 14px;
+  padding: 4px 8px;
+  min-width: 200px;
+  background: transparent;
+  color: #333;
+}
+
+.search-box input:focus {
+  background: rgba(0, 123, 255, 0.05);
+  border-radius: 4px;
 }
 
 .search-box input::placeholder {
@@ -186,12 +205,13 @@
 }
 
 @media (max-width: 1024px) {
+
   .table-header,
   .table-row {
     grid-template-columns: 1fr 2fr 1fr;
     gap: 16px;
   }
-  
+
   .date-info {
     display: none;
   }
@@ -203,21 +223,23 @@
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .search-container {
     max-width: none;
+    margin-top: 0;
+    /* reset on small screens where items stack */
   }
-  
+
   .sort-container {
     margin-left: 0;
   }
-  
+
   .table-header,
   .table-row {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-  
+
   .transaction-id {
     display: none;
   }

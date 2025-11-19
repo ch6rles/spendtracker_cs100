@@ -1,16 +1,76 @@
-import { useState } from 'react'
-import { Search, Bell, User } from 'lucide-react'
-import { transactions } from '../data/transactions'
+import { useState, useEffect, useRef } from 'react'
+import { Search, Bell, User, X } from 'lucide-react'
+import { fetchTransactionsData } from '../services/transactionsApi'
+import type { Transaction } from '../services/transactionsApi'
 import './Transactions.css'
 
 export function Transactions() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('Latest')
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const filteredTransactions = transactions.filter(transaction =>
-    transaction.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.id.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => {
+    const loadTransactions = async () => {
+      setLoading(true)
+      try {
+        const data = await fetchTransactionsData()
+        setTransactions(data.transactions)
+      } catch (error) {
+        console.error('Failed to load transactions:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadTransactions()
+  }, [])
+
+  const filteredTransactions = transactions.filter(transaction => {
+    if (!searchTerm.trim()) return true; // Show all transactions if search is empty
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const transactionName = (transaction.name || transaction.description).toLowerCase();
+    const transactionId = transaction.id.toString().toLowerCase();
+    const transactionCategory = transaction.category.toLowerCase();
+    const transactionDescription = transaction.description.toLowerCase();
+    
+    return (
+      transactionName.includes(searchLower) ||
+      transactionId.includes(searchLower) ||
+      transactionCategory.includes(searchLower) ||
+      transactionDescription.includes(searchLower)
+    );
+  })
+
+  // Apply sorting to filtered transactions
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+    switch (sortBy) {
+      case 'Latest':
+        // Sort by date (newest first), then by time if available
+        const dateTimeA = a.time ? new Date(`${a.date} ${a.time}`) : new Date(a.date)
+        const dateTimeB = b.time ? new Date(`${b.date} ${b.time}`) : new Date(b.date)
+        return dateTimeB.getTime() - dateTimeA.getTime()
+      
+      case 'Oldest':
+        // Sort by date (oldest first), then by time if available
+        const dateTimeA_old = a.time ? new Date(`${a.date} ${a.time}`) : new Date(a.date)
+        const dateTimeB_old = b.time ? new Date(`${b.date} ${b.time}`) : new Date(b.date)
+        return dateTimeA_old.getTime() - dateTimeB_old.getTime()
+      
+      case 'Amount High':
+        // Sort by amount (highest first)
+        return b.amount - a.amount
+      
+      case 'Amount Low':
+        // Sort by amount (lowest first)
+        return a.amount - b.amount
+      
+      default:
+        return 0
+    }
+  })
 
   const formatAmount = (amount: number) => {
     const sign = amount >= 0 ? '+' : ''
@@ -21,7 +81,15 @@ export function Transactions() {
     }
   }
 
-
+  if (loading) {
+    return (
+      <div className="transactions">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          <div>Loading transactions...</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="transactions">
@@ -42,13 +110,61 @@ export function Transactions() {
         <div className="transactions-controls">
           <div className="search-container">
             <div className="search-box">
-              <Search size={20} />
+              <button
+                onClick={() => searchInputRef.current?.focus()}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0',
+                  color: '#666',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+                title="Focus search input"
+              >
+                <Search size={20} />
+              </button>
               <input
+                ref={searchInputRef}
                 type="text"
-                placeholder="Search..."
+                placeholder="Search by name, ID, category, or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchTerm('');
+                    searchInputRef.current?.blur();
+                  }
+                }}
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  flex: 1,
+                  fontSize: '14px',
+                  padding: '4px 8px',
+                  minWidth: '200px',
+                  background: 'transparent',
+                  color: '#333'
+                }}
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    color: '#999',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
             </div>
           </div>
           <div className="sort-container">
@@ -65,6 +181,19 @@ export function Transactions() {
           </div>
         </div>
 
+        {searchTerm.trim() && (
+          <div className="search-results-info" style={{ 
+            padding: '10px 0', 
+            color: '#666', 
+            fontSize: '14px',
+            borderBottom: '1px solid #eee',
+            marginBottom: '10px'
+          }}>
+            Found {sortedTransactions.length} transaction{sortedTransactions.length !== 1 ? 's' : ''} 
+            {sortedTransactions.length > 0 ? ` matching "${searchTerm}"` : ` for "${searchTerm}"`}
+          </div>
+        )}
+
         <div className="transactions-table">
           <div className="table-header">
             <div className="column">Transaction ID</div>
@@ -74,7 +203,7 @@ export function Transactions() {
           </div>
 
           <div className="table-body">
-            {filteredTransactions.map((transaction) => {
+            {sortedTransactions.map((transaction: Transaction) => {
               const amount = formatAmount(transaction.amount)
               return (
                 <div key={transaction.id} className="table-row">
@@ -83,8 +212,8 @@ export function Transactions() {
                   </div>
                   <div className="column payment-name">
                     <div className="payment-info">
-                      <span className="payment-icon">{transaction.icon}</span>
-                      <span className="payment-text">{transaction.name}</span>
+                      <span className="payment-icon">{transaction.icon || '💳'}</span>
+                      <span className="payment-text">{transaction.name || transaction.description}</span>
                     </div>
                   </div>
                   <div className="column amount" style={{ color: amount.color }}>
@@ -93,7 +222,7 @@ export function Transactions() {
                   <div className="column date">
                     <div className="date-info">
                       <div className="date-text">{transaction.date}</div>
-                      <div className="time-text">{transaction.time}</div>
+                      <div className="time-text">{transaction.time || 'N/A'}</div>
                     </div>
                   </div>
                 </div>
