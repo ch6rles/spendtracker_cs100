@@ -452,9 +452,9 @@
 }
 
 .view-transactions-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
-  filter: brightness(1.1);
+
+  filter: brightness(0.5);
+  color:#203923;
 }
 
 .cards-list {
