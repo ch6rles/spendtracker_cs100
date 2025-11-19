@@ -1,7 +1,7 @@
 .dashboard {
   flex: 1;
-  padding: 28px;
-  background-color: #e9f0ed;
+  padding: var(--spacing-lg);
+  background: transparent; /* Let the main app background show through */
   min-height: 100vh;
 }
 
@@ -9,149 +9,248 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: var(--spacing-lg);
+  background: var(--warm-white);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-light);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-lg);
 }
 
 .header-left h1 {
-  color: #7ED321;
+  color: var(--primary-green);
   margin: 0;
   font-size: 28px;
   font-weight: 600;
 }
 
 .account-selector {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: rgb(228, 228, 228);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--soft-gray);
+  border-radius: var(--radius-sm);
+  background: var(--warm-gray);
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.account-selector:hover {
+  background: var(--warm-white);
+  box-shadow: var(--shadow-light);
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-lg);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #666;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Welcome Section */
+.welcome-section {
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.welcome-content h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.welcome-content p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+  font-size: 16px;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.stat-card {
+  background: var(--warm-gray);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  background: var(--warm-white);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-value.positive {
+  color: var(--primary-green);
+}
+
+.stat-value.negative {
+  color: var(--danger-red);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-lg);
 }
 
 .chart-section {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-light);
   display: flex;
-  gap: 20px;
+  gap: var(--spacing-xl);
   flex-wrap: wrap;
   min-height: 500px;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .income-analysis {
   flex: 1 1 580px;
-  /* grow | shrink | basis */
   min-width: 0;
-  /* Prevents flex item from overflowing */
   max-width: 100%;
 }
 
 .accounts-section {
   flex: 1 1 300px;
-  /* grow | shrink | basis */
   min-width: 280px;
   max-width: 100%;
-  padding-left: 20px;
-  border-left: 1px solid #eee;
+  padding-left: var(--spacing-lg);
+  border-left: 1px solid var(--soft-gray);
 }
 
 @media (max-width: 1200px) {
   .chart-section {
     flex-direction: column;
-    padding: 15px;
+    padding: var(--spacing-lg);
   }
 
   .accounts-section {
     border-left: none;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--soft-gray);
     padding-left: 0;
-    padding-top: 20px;
+    padding-top: var(--spacing-lg);
   }
 }
 
 .accounts-section h3 {
-  color: #333;
-  margin: 0 0 15px 0;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md) 0;
   font-size: 18px;
   font-weight: 600;
 }
 
 .sync-info {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .accounts-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md);
 }
 
 .account-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  padding: var(--spacing-md);
+  background: var(--warm-gray);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.account-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary-blue);
+  transition: width 0.2s ease;
 }
 
 .account-item:hover {
-  background: #f0f1f2;
+  background: var(--warm-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.account-item:hover::before {
+  width: 8px;
 }
 
 .account-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-md);
 }
 
 .account-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  background: var(--warm-white);
+  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+}
+
+.account-item:hover .account-icon {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-medium);
 }
 
 .account-name {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .account-balance-section {
@@ -337,56 +436,77 @@
 
 .view-transactions-btn {
   width: 100%;
-  padding: 12px;
-  margin-top: 12px;
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
   display: inline-block;
   z-index: 1;
-  background: #f0f9ff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  font-weight: 500;
+  color: white;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-light);
 }
 
 .view-transactions-btn:hover {
-  background: #e0f2fe;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+  filter: brightness(1.1);
 }
 
 .cards-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-md);
 }
 
 .card-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
   transition: all 0.2s ease;
+  border: 1px solid var(--soft-gray);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--gradient-primary);
 }
 
 .card-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-heavy);
+  border-color: var(--primary-blue);
 }
 
 .card-visual {
   width: 80px;
   height: 50px;
-  border-radius: 8px;
-  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--gradient-primary);
   display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-light);
+  position: relative;
   flex-direction: column;
   justify-content: space-between;
-  padding: 8px;
+  padding: var(--spacing-sm);
   color: white;
   font-size: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .card-chip {
