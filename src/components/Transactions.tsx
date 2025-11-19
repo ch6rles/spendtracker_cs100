@@ -134,8 +134,8 @@ export function Transactions() {
         <div className="header-right">
           <Bell size={20} />
           <div className="user-info">
-            <User size={20} />
-            <span>Nhien, Pham</span>
+            <User color="var(--warm-gray)" size={20} />
+            <span style={{ color: "white" }}> Nhien, Pham</span>
           </div>
         </div>
       </header>

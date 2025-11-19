@@ -131,7 +131,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
             </div>
           </div>
-          
+
           <div className="chart-preview">
             <div className="mini-chart">
               <Line
@@ -165,14 +165,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <h3>RECENT TRANSACTIONS</h3>
               <span className="transaction-count">You've had 15 transactions so far this month</span>
             </div>
-            
+
             <div className="transactions-list">
               <div className="transaction-header">
                 <span>Date</span>
                 <span>Name</span>
                 <span>Amount</span>
               </div>
-              
+
               {recentTransactions.map((transaction, index) => (
                 <div key={index} className="transaction-row">
                   <span className="transaction-date">{transaction.date}</span>
@@ -195,7 +195,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <div className="sync-info">
               <span>🔄 about 5 hours ago | Sync now</span>
             </div>
-            
+
             <div className="accounts-list">
               {accounts.map((account, index) => (
                 <div key={index} className="account-item">
@@ -219,7 +219,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <h3>COMING UP</h3>
             <div className="coming-up-content">
               <p>You have 0 recurring charges due within the next 10 days for $0.</p>
-              
+
               {/* Mini Calendar */}
               <div className="mini-calendar">
                 <div className="calendar-header">
