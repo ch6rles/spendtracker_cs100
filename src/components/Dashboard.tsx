@@ -117,7 +117,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const data = labels.map(label => breakdown[label as keyof typeof breakdown])
     
     // Use different colors for different categories
-    const colors = ['#3674B5', '#66BB51', '#0B4F1A', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57']
+    const colors = ['#fd5901', '#f78104', '#faab36', '#249ea0', '#008083', '#9B9B9B', '#96CEB4', '#FECA57']
     
     return {
       labels: labels.length > 0 ? labels : ['No Data'],
@@ -346,23 +346,23 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </button>
               <div className="category-labels">
                 <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#2D5A27' }}></div>
-                  <span>Housing & Utilities</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#7ED321' }}></div>
-                  <span>Transportation</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#4A90E2' }}></div>
+                  <div className="color-dot" style={{ backgroundColor: '#fd5901' }}></div>
                   <span>Foods & Groceries</span>
                 </div>
                 <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#D0021B' }}></div>
+                  <div className="color-dot" style={{ backgroundColor: '#f78104' }}></div>
+                  <span>Transportation</span>
+                </div>
+                <div className="category-item">
+                  <div className="color-dot" style={{ backgroundColor: '#faab36' }}></div>
+                  <span>Housing & Utilities</span>
+                </div>
+                <div className="category-item">
+                  <div className="color-dot" style={{ backgroundColor: '#249ea0' }}></div>
                   <span>Entertainment</span>
                 </div>
                 <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#F5A623' }}></div>
+                  <div className="color-dot" style={{ backgroundColor: '#008083' }}></div>
                   <span>Shopping</span>
                 </div>
                 <div className="category-item">
