@@ -1,7 +1,7 @@
 .transactions {
   flex: 1;
   padding: var(--spacing-lg);
-  background: transparent; /* Let the main app background show through */
+  background: #001629;
   min-height: 100vh;
 }
 
@@ -14,10 +14,14 @@
   padding: var(--spacing-lg);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-light);
+  background: rgb(1, 30, 55);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(66, 66, 66, 0.873);
 }
 
 .header-left h1 {
-  color: var(--text-primary);
+  color: var(--warm-gray);
   margin: 0;
   font-size: 28px;
   font-weight: 600;
@@ -27,18 +31,19 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
+  color: var(--warm-gray);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  color: var(--text-secondary);
+  color: var(--warm-gray);
   font-weight: 500;
 }
 
 .transactions-content {
-  background: var(--warm-white);
+  background: linear-gradient(180deg, rgba(228, 245, 237, 0.9), rgba(236, 245, 250, 0.9));
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-light);
   overflow: hidden;
@@ -75,7 +80,7 @@
 }
 
 .loading-container h3 {
-  color: var(--text-primary);
+  color: var(--warm-gray);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -97,13 +102,13 @@
   padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background: white;
+  background: rgb(90, 71, 71);
   min-width: 300px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .search-box button:hover {
-  color: #333;
+  color: #470000;
   transform: scale(1.1);
   transition: all 0.2s ease;
 }
@@ -125,7 +130,7 @@
 }
 
 .search-box input::placeholder {
-  color: #999;
+  color: #383838;
 }
 
 .sort-container {

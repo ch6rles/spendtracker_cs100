@@ -49,12 +49,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   // Calculate quick stats
   const getQuickStats = () => {
     if (!dashboardData) return null
-    
+
     const thisMonthSpending = dashboardData.monthlySpending?.[0]?.totalSpent || 0
     const lastMonthSpending = dashboardData.monthlySpending?.[1]?.totalSpent || 0
     const change = thisMonthSpending - lastMonthSpending
     const changePercent = lastMonthSpending ? ((change / lastMonthSpending) * 100) : 0
-    
+
     return {
       thisMonth: thisMonthSpending,
       change: change,
@@ -75,7 +75,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         setLoading(false)
       }
     }
-    
+
     loadDashboardData()
   }, [])
 
@@ -105,7 +105,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
     const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const spendingData = new Array(12).fill(0)
-    
+
     dashboardData.monthlySpending.forEach(monthData => {
       const month = new Date(monthData.month).getMonth()
       spendingData[month] = monthData.totalSpent
@@ -248,7 +248,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>Dashboard</h1>
+        <h1 style={{ color: "white" }}>Dashboard</h1>
         <div className="header-left">
           <select className="account-selector">
             <option>All Accounts</option>
@@ -259,8 +259,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="header-right">
           <Bell size={20} />
           <div className="user-info">
-            <User size={20} />
-            <span>Nhien, Pham</span>
+            <User color="var(--warm-gray)" size={20} />
+            <span style={{ color: "white" }}> Nhien, Pham</span>
           </div>
         </div>
       </header>
