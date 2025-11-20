@@ -1,5 +1,10 @@
 const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
+// API endpoints
+const TRANSACTIONS_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/transactions';
+const INCOME_ANALYSIS = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/income/analysis';
+const PIE_CHART_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/expenses/pie';
+
 interface RecentTransaction {
   id: string;
   accountId: string | null;
@@ -7,6 +12,80 @@ interface RecentTransaction {
   description: string;
   amount: number;
   category: string;
+}
+
+export interface Transaction {
+  id: string;
+  accountId: string | null;
+  date: string;
+  description: string;
+  amount: number;
+  category: string;
+}
+
+// Function to find the most recent and previous months from transaction data
+const findMostRecentMonths = (transactions: Transaction[]): { currentMonth: Date, previousMonth: Date } => {
+  // Extract all unique year-month combinations from transactions
+  const monthYearSet = new Set<string>();
+  
+  transactions.forEach(transaction => {
+    const date = new Date(transaction.date);
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    monthYearSet.add(yearMonth);
+  });
+  
+  // Sort the year-month strings in descending order to get most recent first
+  const sortedMonths = Array.from(monthYearSet).sort().reverse();
+  
+  if (sortedMonths.length === 0) {
+    // Fallback to current date if no transactions found
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return { currentMonth, previousMonth };
+  }
+  
+  // Get the most recent month
+  const [recentYear, recentMonth] = sortedMonths[0].split('-').map(Number);
+  const currentMonth = new Date(recentYear, recentMonth - 1, 1);
+  
+  // Get the previous month
+  let previousMonth: Date;
+  if (sortedMonths.length > 1) {
+    const [prevYear, prevMonth] = sortedMonths[1].split('-').map(Number);
+    previousMonth = new Date(prevYear, prevMonth - 1, 1);
+  } else {
+    // If only one month of data, calculate previous month
+    previousMonth = new Date(recentYear, recentMonth - 2, 1);
+  }
+  
+  console.log('Most recent month found:', currentMonth.toDateString());
+  console.log('Previous month found:', previousMonth.toDateString());
+  
+  return { currentMonth, previousMonth };
+};
+
+export interface MonthlySpendingSummary {
+  currentMonth: {
+    month: string;
+    year: number;
+    totalSpent: number;
+    totalIncome: number;
+    netAmount: number;
+  };
+  previousMonth: {
+    month: string;
+    year: number;
+    totalSpent: number;
+    totalIncome: number;
+    netAmount: number;
+  };
+  comparison: {
+    spendingChange: number;
+    spendingChangePercent: number;
+    incomeChange: number;
+    incomeChangePercent: number;
+  };
 }
 
 export interface PieChartData {
@@ -125,11 +204,143 @@ export const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 };
 
+export const fetchMonthlySpendingSummary = async (): Promise<MonthlySpendingSummary> => {
+  try {
+    console.log('Fetching transactions for monthly spending summary...');
+    
+    const response = await fetch(TRANSACTIONS_API, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const transactions: Transaction[] = await response.json();
+    console.log('Transactions received:', transactions.length);
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    // Dynamically find the most recent and previous months from transaction data
+    const { currentMonth, previousMonth } = findMostRecentMonths(transactions);
+    
+    const currentYear = currentMonth.getFullYear();
+    const currentMonthIndex = currentMonth.getMonth();
+    const previousYear = previousMonth.getFullYear();
+    const previousMonthIndex = previousMonth.getMonth();
+    
+    console.log('Current month:', monthNames[currentMonthIndex], currentYear);
+    console.log('Previous month:', monthNames[previousMonthIndex], previousYear);
+    
+    // Filter transactions for current and previous month
+    const currentMonthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return transactionDate.getFullYear() === currentYear && 
+             transactionDate.getMonth() === currentMonthIndex;
+    });
+    
+    const previousMonthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return transactionDate.getFullYear() === previousYear && 
+             transactionDate.getMonth() === previousMonthIndex;
+    });
+    
+    console.log(`Found ${currentMonthTransactions.length} transactions for ${monthNames[currentMonthIndex]} ${currentYear}`);
+    console.log(`Found ${previousMonthTransactions.length} transactions for ${monthNames[previousMonthIndex]} ${previousYear}`);
+    
+    // Calculate totals for current month - include ALL negative amounts (expenses)
+    const currentMonthExpenses = currentMonthTransactions.filter(t => t.amount < 0);
+    const currentMonthSpent = currentMonthExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const currentMonthIncome = currentMonthTransactions
+      .filter(t => t.amount > 0 && (t.category === 'income' || t.description.toLowerCase().includes('salary') || t.description.toLowerCase().includes('paycheck')))
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    // Calculate totals for previous month (using same logic)
+    const previousMonthExpenses = previousMonthTransactions.filter(t => t.amount < 0);
+    const previousMonthSpent = previousMonthExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const previousMonthIncome = previousMonthTransactions
+      .filter(t => t.amount > 0 && (t.category === 'income' || t.description.toLowerCase().includes('salary') || t.description.toLowerCase().includes('paycheck')))
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    console.log(`${monthNames[currentMonthIndex]} ${currentYear} - Spent: $${currentMonthSpent.toFixed(2)}, Income: $${currentMonthIncome.toFixed(2)}`);
+    console.log(`${monthNames[previousMonthIndex]} ${previousYear} - Spent: $${previousMonthSpent.toFixed(2)}, Income: $${previousMonthIncome.toFixed(2)}`);
+    
+    // Calculate changes
+    const spendingChange = currentMonthSpent - previousMonthSpent;
+    const spendingChangePercent = previousMonthSpent > 0 ? ((spendingChange / previousMonthSpent) * 100) : 0;
+    const incomeChange = currentMonthIncome - previousMonthIncome;
+    const incomeChangePercent = previousMonthIncome > 0 ? ((incomeChange / previousMonthIncome) * 100) : 0;
+    
+    const summary: MonthlySpendingSummary = {
+      currentMonth: {
+        month: monthNames[currentMonthIndex],
+        year: currentYear,
+        totalSpent: currentMonthSpent,
+        totalIncome: currentMonthIncome,
+        netAmount: currentMonthIncome - currentMonthSpent
+      },
+      previousMonth: {
+        month: monthNames[previousMonthIndex],
+        year: previousYear,
+        totalSpent: previousMonthSpent,
+        totalIncome: previousMonthIncome,
+        netAmount: previousMonthIncome - previousMonthSpent
+      },
+      comparison: {
+        spendingChange,
+        spendingChangePercent,
+        incomeChange,
+        incomeChangePercent
+      }
+    };
+    
+    console.log('Monthly spending summary:', summary);
+    return summary;
+  } catch (error) {
+    console.error('Error fetching monthly spending summary:', error);
+    console.log('Using fallback monthly spending data due to API error');
+    
+    // Return fallback data if API fails
+    return {
+      currentMonth: {
+        month: 'November',
+        year: 2024,
+        totalSpent: 307.55,
+        totalIncome: 8000.00,
+        netAmount: 7692.45
+      },
+      previousMonth: {
+        month: 'October',
+        year: 2024,
+        totalSpent: 284.30,
+        totalIncome: 8000.00,
+        netAmount: 7715.70
+      },
+      comparison: {
+        spendingChange: 23.25,
+        spendingChangePercent: 8.18,
+        incomeChange: 0,
+        incomeChangePercent: 0
+      }
+    };
+  }
+};
+
 export const fetchPieChartData = async (): Promise<PieChartData> => {
   try {
     console.log('Fetching pie chart data from API...');
     
-    const response = await fetch(`${API_BASE_URL}/expenses/pie`, {
+    const response = await fetch(PIE_CHART_API, {
       method: 'GET',
       headers: {
         'ngrok-skip-browser-warning': 'true',

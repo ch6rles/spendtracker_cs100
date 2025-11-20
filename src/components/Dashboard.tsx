@@ -12,8 +12,10 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
-import { fetchDashboardData, fetchPieChartData } from '../services/dashboardApi'
-import type { DashboardData, PieChartData } from '../services/dashboardApi'
+import { fetchDashboardData, fetchPieChartData, fetchMonthlySpendingSummary } from '../services/dashboardApi'
+import type { DashboardData, PieChartData, MonthlySpendingSummary } from '../services/dashboardApi'
+import { fetchRewardsData } from '../services/rewardsApi'
+import type { RewardsResponse } from '../services/rewardsApi'
 import './Dashboard.css'
 
 ChartJS.register(
@@ -34,8 +36,10 @@ interface DashboardProps {
 export function Dashboard({ onNavigate }: DashboardProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [pieChartData, setPieChartData] = useState<PieChartData | null>(null)
+  const [monthlySpending, setMonthlySpending] = useState<MonthlySpendingSummary | null>(null)
+  const [rewardsData, setRewardsData] = useState<RewardsResponse | null>(null)
   const [loading, setLoading] = useState(true)
-
+  const [incomeAnalysis, setIncomeAnalysis] = useState<any>(null);
   // Helper function for time-based greeting
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours()
@@ -44,20 +48,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     return 'Good evening'
   }
 
-  // Calculate quick stats
-  const getQuickStats = () => {
-    if (!dashboardData) return null
+  const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
-    const thisMonthSpending = dashboardData.monthlySpending?.[0]?.totalSpent || 0
-    const lastMonthSpending = dashboardData.monthlySpending?.[1]?.totalSpent || 0
-    const change = thisMonthSpending - lastMonthSpending
-    const changePercent = lastMonthSpending ? ((change / lastMonthSpending) * 100) : 0
+  // Calculate quick stats using real monthly spending data
+  const getQuickStats = () => {
+    if (!monthlySpending) return null
+
+    const currentMonth = monthlySpending.currentMonth.totalSpent
+    const previousMonth = monthlySpending.previousMonth.totalSpent
+    const change = monthlySpending.comparison.spendingChange
 
     return {
-      thisMonth: thisMonthSpending,
+      thisMonth: currentMonth,
+      lastMonth: previousMonth,
       change: change,
-      changePercent: changePercent,
-      isPositive: change >= 0
+      isPositive: change >= 0,
+      currentMonthName: monthlySpending.currentMonth.month,
+      previousMonthName: monthlySpending.previousMonth.month,
+      currentYear: monthlySpending.currentMonth.year,
+      previousYear: monthlySpending.previousMonth.year
     }
   }
 
@@ -65,21 +74,52 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const loadDashboardData = async () => {
       setLoading(true)
       try {
-        const [data, pieData] = await Promise.all([
+        const [data, pieData, monthlyData, rewards] = await Promise.all([
           fetchDashboardData(),
-          fetchPieChartData()
+          fetchPieChartData(),
+          fetchMonthlySpendingSummary(),
+          fetchRewardsData(),
+
         ])
         setDashboardData(data)
         setPieChartData(pieData)
+        setMonthlySpending(monthlyData)
+        setRewardsData(rewards)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
       } finally {
         setLoading(false)
       }
     }
-
+    fetchIncomeAnalysis()
     loadDashboardData()
+
   }, [])
+
+  const fetchIncomeAnalysis = async () => {
+    const response = await fetch(`${API_BASE_URL}/income/analysis`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    
+        const rawData = await response.json();
+        console.log('Raw income analysis data received:', rawData);
+        const myMap = new Map<string, any>(Object.entries(rawData));
+        const keyArray: string[] = Array.from(myMap.keys());
+        const valArray: number[] = Array.from(myMap.values());
+        // Transform the data to match our interface
+        setIncomeAnalysis(rawData);
+  }
 
   const handleViewTransactions = () => {
     console.log('handleViewTransactions called, onNavigate:', onNavigate);
@@ -90,13 +130,18 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   // Convert monthly spending data to chart format
   const getIncomeData = () => {
-    if (!dashboardData?.monthlySpending) {
+    if (incomeAnalysis) {
+       // const keys: string[] = [];
+       // const values: any[] = [];
+        const myMap = new Map<string, any>(Object.entries(incomeAnalysis ));
+        const keyArray: string[] = Array.from(myMap.keys());
+        const valArray: number[] = Array.from(myMap.values());
       return {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        labels: keyArray,
         datasets: [
           {
             label: 'Spending',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            data: valArray,
             borderColor: '#7ED321',
             backgroundColor: 'rgba(126, 211, 33, 0.1)',
             tension: 0.4,
@@ -107,11 +152,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
     const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const spendingData = new Array(12).fill(0)
-
+/*
     dashboardData.monthlySpending.forEach(monthData => {
       const month = new Date(monthData.month).getMonth()
       spendingData[month] = monthData.totalSpent
     })
+      */
 
     return {
       labels: monthLabels,
@@ -337,18 +383,24 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         {getQuickStats() && (
           <div className="quick-stats">
             <div className="stat-card">
-              <div className="stat-value">${getQuickStats()?.thisMonth.toFixed(2)}</div>
-              <div className="stat-label">Spent this month</div>
-            </div>
-            <div className="stat-card">
-              <div className={`stat-value ${getQuickStats()?.isPositive ? 'negative' : 'positive'}`}>
-                {getQuickStats()?.isPositive ? '+' : ''}${Math.abs(getQuickStats()?.change || 0).toFixed(2)}
+              <div className="stat-value spending-value">${getQuickStats()?.thisMonth.toFixed(2)}</div>
+              <div className="stat-label">
+                {getQuickStats()?.currentMonthName} {getQuickStats()?.currentYear} Spending
               </div>
-              <div className="stat-label">vs last month</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{accounts.length}</div>
-              <div className="stat-label">Active accounts</div>
+              <div className={`stat-value comparison-value ${getQuickStats()?.isPositive ? 'negative' : 'positive'}`}>
+                {getQuickStats()?.isPositive ? '+' : '-'}${Math.abs(getQuickStats()?.change || 0).toFixed(2)}
+              </div>
+              <div className="stat-label">
+                vs {getQuickStats()?.previousMonthName} {getQuickStats()?.previousYear}
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value percentage-value">
+                {rewardsData?.recommendedCards?.length || 0}
+              </div>
+              <div className="stat-label">Recommended Accounts</div>
             </div>
           </div>
         )}
