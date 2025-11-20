@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Dashboard } from './components/Dashboard'
 import { Transactions } from './components/Transactions'
 import { Rewards } from './components/Rewards'
+import { Account } from './components/Account'
+import { Settings } from './components/Settings'
 import { Sidebar } from './components/Sidebar'
 import './App.css'
 
@@ -24,9 +26,9 @@ function App() {
       case 'rewards':
         return <Rewards />
       case 'account':
-        return <div className="content-placeholder">Account settings coming soon...</div>
+        return <Account />
       case 'settings':
-        return <div className="content-placeholder">Settings coming soon...</div>
+        return <Settings />
       default:
         return <Dashboard />
     }
