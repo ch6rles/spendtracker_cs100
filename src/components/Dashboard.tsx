@@ -13,7 +13,9 @@ import {
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
 import { fetchDashboardData } from '../services/dashboardApi'
+import { fetchRewardsData } from '../services/rewardsApi'
 import type { DashboardData } from '../services/dashboardApi'
+import type { RewardsResponse } from '../services/rewardsApi'
 import './Dashboard.css'
 
 ChartJS.register(
@@ -33,6 +35,7 @@ interface DashboardProps {
 
 export function Dashboard({ onNavigate }: DashboardProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [rewardsData, setRewardsData] = useState<RewardsResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Helper function for time-based greeting
@@ -64,8 +67,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const loadDashboardData = async () => {
       setLoading(true)
       try {
-        const data = await fetchDashboardData()
-        setDashboardData(data)
+        // Fetch both dashboard and rewards data
+        const [dashboardDataResponse, rewardsDataResponse] = await Promise.all([
+          fetchDashboardData(),
+          fetchRewardsData()
+        ])
+        
+        setDashboardData(dashboardDataResponse)
+        setRewardsData(rewardsDataResponse)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
       } finally {
@@ -255,45 +264,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }));
   };
 
-  // mock account data
-  const accounts = [
-    {
-      name: 'Checking',
-      balance: '$2,847.23',
-      icon: '🏦',
-      type: 'checking',
-      color: '#6366f1'
-    },
-    {
-      name: 'Credit Cards',
-      balance: '$1,234.56',
-      icon: '💳',
-      type: 'credit',
-      color: '#ec4899'
-    },
-    {
-      name: 'Net Cash',
-      balance: '$15,847.90',
-      icon: '💰',
-      type: 'cash',
-      color: '#10b981'
-    },
-    {
-      name: 'Savings',
-      balance: '$8,542.11',
-      icon: '🏦',
-      type: 'savings',
-      color: '#f59e0b'
-    },
-    {
-      name: 'Investments',
-      balance: '$24,891.47',
-      icon: '📈',
-      type: 'investment',
-      color: '#8b5cf6'
-    }
-  ];
-
   if (loading) {
     return (
       <div className="dashboard">
@@ -312,8 +282,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
           <select className="account-selector">
             <option>All Accounts</option>
-            <option>Checking Account</option>
-            <option>Savings Account</option>
+            {rewardsData?.recommendedCards?.map((rewardCard, index) => (
+              <option key={index}>{rewardCard.card.cardName}</option>
+            ))}
           </select>
         </div>
         <div className="header-right">
@@ -344,7 +315,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="stat-label">vs last month</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{accounts.length}</div>
+              <div className="stat-value">{rewardsData?.recommendedCards?.length || 0}</div>
               <div className="stat-label">Active accounts</div>
             </div>
           </div>
@@ -423,20 +394,29 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             </div>
 
             <div className="accounts-list">
-              {accounts.map((account, index) => (
+              {rewardsData?.recommendedCards?.map((rewardCard, index) => (
                 <div key={index} className="account-item">
                   <div className="account-info">
-                    <div className="account-icon" style={{ backgroundColor: account.color }}>
-                      {account.icon}
+                    <div className="account-icon" style={{ backgroundColor: '#6366f1' }}>
+                      💳
                     </div>
-                    <span className="account-name">{account.name}</span>
+                    <span className="account-name">{rewardCard.card.cardName}</span>
                   </div>
                   <div className="account-balance-section">
-                    <span className="account-balance">{account.balance}</span>
+                    <span className="account-balance">Active</span>
                     <ChevronDown size={16} />
                   </div>
                 </div>
-              ))}
+              )) || (
+                <div className="account-item">
+                  <div className="account-info">
+                    <div className="account-icon" style={{ backgroundColor: '#6366f1' }}>
+                      💳
+                    </div>
+                    <span className="account-name">Loading accounts...</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
