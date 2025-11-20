@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { CATEGORY_COLORS } from '../components/categoryColor'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,6 +27,8 @@ ChartJS.register(
   Legend,
   ArcElement
 )
+
+
 
 interface DashboardProps {
   onNavigate?: (tab: 'dashboard' | 'transactions' | 'rewards' | 'account' | 'settings') => void
@@ -130,7 +133,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         datasets: [
           {
             data: [0, 0, 0],
-            backgroundColor: ['#3674B5', '#66BB51', '#0B4F1A'],
+            backgroundColor: ['#fd5901', '#008083', '#9B9B9B'],
             borderWidth: 0,
           },
         ],
@@ -140,16 +143,16 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const breakdown = dashboardData.breakdown
     const labels = Object.keys(breakdown).filter(key => breakdown[key as keyof typeof breakdown] > 0)
     const data = labels.map(label => breakdown[label as keyof typeof breakdown])
-    
-    // Use different colors for different categories
-    const colors = ['#fd5901', '#f78104', '#faab36', '#249ea0', '#008083', '#9B9B9B', '#96CEB4', '#FECA57']
-    
+
+    // Map colors based on category names using CATEGORY_COLORS
+    const colors = labels.map(label => CATEGORY_COLORS[label] || '#9B9B9B')
+
     return {
       labels: labels.length > 0 ? labels : ['No Data'],
       datasets: [
         {
           data: data.length > 0 ? data : [1],
-          backgroundColor: colors.slice(0, labels.length || 1),
+          backgroundColor: colors,
           borderWidth: 0,
         },
       ],
@@ -247,7 +250,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <header className="dashboard-header">
         <h1>Dashboard</h1>
         <div className="header-left">
-
           <select className="account-selector">
             <option>All Accounts</option>
             <option>Checking Account</option>
@@ -343,7 +345,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             </div>
           </div>
 
-
           <div className="accounts-section">
             <h3>ACCOUNTS</h3>
             <div className="sync-info">
@@ -396,33 +397,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 View All Transactions 📋
               </button>
               <div className="category-labels">
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#fd5901' }}></div>
-                  <span>Foods & Groceries</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#f78104' }}></div>
-                  <span>Transportation</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#faab36' }}></div>
-                  <span>Housing & Utilities</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#249ea0' }}></div>
-                  <span>Entertainment</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#008083' }}></div>
-                  <span>Shopping</span>
-                </div>
-                <div className="category-item">
-                  <div className="color-dot" style={{ backgroundColor: '#9B9B9B' }}></div>
-                  <span>Other</span>
-                </div>
+                {categoryData.labels.map((label, index) => (
+                  <div key={label} className="category-item">
+                    <div 
+                      className="color-dot" 
+                      style={{ backgroundColor: categoryData.datasets[0].backgroundColor[index] }}
+                    ></div>
+                    <span>{label}</span>
+                  </div>
+                ))}
               </div>
             </div>
-
           </div>
 
           <div className="best-cards">

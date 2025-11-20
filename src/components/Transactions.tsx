@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, Bell, User, X } from 'lucide-react'
 import { fetchTransactionsData } from '../services/transactionsApi'
 import type { Transaction } from '../services/transactionsApi'
+import { getCategoryColor } from '../components/categoryColor'
 import './Transactions.css'
 
 export function Transactions() {
@@ -81,38 +82,6 @@ export function Transactions() {
     }
   }
 
-  const getCategoryColor = (category: string): string => {
-    const categoryColors: { [key: string]: string } = {
-      'Food & Groceries': 'var(--primary-green)',
-      'food': 'var(--primary-green)',
-      'groceries': 'var(--primary-green)',
-      'Transportation': 'var(--primary-blue)',
-      'transport': 'var(--primary-blue)',
-      'gas': 'var(--primary-blue)',
-      'Housing & Utilities': 'var(--accent-orange)',
-      'housing': 'var(--accent-orange)',
-      'utilities': 'var(--accent-orange)',
-      'Entertainment': 'var(--accent-purple)',
-      'entertainment': 'var(--accent-purple)',
-      'Healthcare': 'var(--danger-red)',
-      'health': 'var(--danger-red)',
-      'Education': '#8B5CF6',
-      'education': '#8B5CF6',
-      'Shopping': '#EC4899',
-      'shopping': '#EC4899',
-      'Transfer': 'var(--medium-gray)',
-      'transfer': 'var(--medium-gray)',
-      'bank': 'var(--medium-gray)',
-      'Deposit': 'var(--primary-green)',
-      'deposit': 'var(--primary-green)',
-      'income': 'var(--primary-green)',
-      'Other': 'var(--text-muted)',
-      'default': 'var(--text-muted)'
-    };
-    
-    return categoryColors[category.toLowerCase()] || categoryColors['default'];
-  }
-
   if (loading) {
     return (
       <div className="transactions">
@@ -134,8 +103,8 @@ export function Transactions() {
         <div className="header-right">
           <Bell size={20} />
           <div className="user-info">
-            <User size={20} />
-            <span>Nhien, Pham</span>
+            <User color="var(--warm-gray)" size={20} />
+            <span style={{ color: "white" }}> Nhien, Pham</span>
           </div>
         </div>
       </header>
