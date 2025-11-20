@@ -1,7 +1,7 @@
 .rewards {
   flex: 1;
-  padding: 20px;
-  background-color: #001629;
+  padding: var(--spacing-lg);
+  background: transparent; /* Let the main app background show through */
   min-height: 100vh;
 }
 
@@ -9,19 +9,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  background: rgb(1, 30, 55);
+  margin-bottom: var(--spacing-xl);
+  background: var(--warm-white);
+  padding: var(--spacing-lg);
   border-radius: var(--radius-md);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(66, 66, 66, 0.873);
+  box-shadow: var(--shadow-light);
 }
 
 .rewards-title {
-  color: #7ED321;
+  color: var(--text-primary);
   margin: 0;
   font-size: 28px;
   font-weight: 600;
@@ -30,22 +26,31 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
-  color: var(--warm-gray);
+  gap: var(--spacing-lg);
+  color: var(--text-secondary);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #666;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .rewards-content {
+<<<<<<< HEAD
   background: linear-gradient(180deg, rgba(228, 245, 237, 0.9), rgba(236, 245, 250, 0.9));;
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+=======
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(255,255,255,0.2);
+>>>>>>> main
 }
 
 .cards-section {
@@ -69,8 +74,8 @@
 }
 
 .card-section h2 {
-  color: #333;
-  margin: 0 0 20px 0;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
   font-size: 22px;
   font-weight: 600;
 }
@@ -78,21 +83,24 @@
 .card-visual {
   width: 340px;
   height: 200px;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 24px;
+  padding: var(--spacing-lg);
   color: white;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-heavy);
   transform: perspective(1000px) rotateY(-5deg);
   transition: transform 0.3s ease;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .card-visual:hover {
   transform: perspective(1000px) rotateY(0deg) translateY(-5px);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
 }
 
 .card-type {
@@ -139,43 +147,45 @@
 .reward-amount {
   font-size: 24px;
   font-weight: 600;
-  color: #2d5a27;
-  margin-bottom: 8px;
+  color: var(--primary-green);
+  margin-bottom: var(--spacing-sm);
 }
 
 .reward-description {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.4;
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-md);
 }
 
 .reward-category {
   display: inline-block;
-  padding: 4px 10px;
-  background-color: #f5f5f5;
-  border-radius: 12px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--soft-gray);
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 500;
-  color: #555;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 .card-visual.main {
   width: 280px;
   height: 175px;
-  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #ff6b6b 100%);
-  border-radius: 16px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-xl);
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 20px;
+  padding: var(--spacing-lg);
   color: white;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-heavy);
   transform: perspective(1000px) rotateY(-5deg);
   transition: transform 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .card-visual.main:hover {
@@ -213,29 +223,30 @@
 }
 
 .reward-item {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 24px;
-  border-left: 4px solid #7ED321;
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border-left: 4px solid var(--primary-green);
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
 }
 
 .reward-item:hover {
-  background: #f0f9ff;
+  background: var(--soft-blue);
   transform: translateX(5px);
-  box-shadow: 0 4px 15px rgba(126, 211, 33, 0.1);
+  box-shadow: var(--shadow-medium);
 }
 
 .reward-amount {
   font-size: 24px;
   font-weight: 700;
-  color: #7ED321;
-  margin-bottom: 8px;
+  color: var(--primary-green);
+  margin-bottom: var(--spacing-sm);
 }
 
 .reward-description {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 

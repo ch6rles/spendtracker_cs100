@@ -168,4 +168,8 @@ export const Account: React.FC = () => {
       </div>
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> main

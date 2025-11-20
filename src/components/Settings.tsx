@@ -282,4 +282,8 @@ export const Settings: React.FC = () => {
       </div>
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> main

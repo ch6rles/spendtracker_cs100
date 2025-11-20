@@ -354,4 +354,8 @@ input:checked + .slider:before {
   .setting-select {
     align-self: flex-end;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

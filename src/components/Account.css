@@ -403,4 +403,8 @@ input:checked + .slider:before {
     text-align: center;
     gap: var(--spacing-sm);
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main
