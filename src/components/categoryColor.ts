@@ -12,15 +12,15 @@ export const CATEGORY_COLORS: { [key: string]: string } = {
 export const getCategoryColor = (category: string): string => {
   // Normalize the category name for matching
   const normalizedCategory = category.trim();
-  
+
   // Direct match
   if (CATEGORY_COLORS[normalizedCategory]) {
     return CATEGORY_COLORS[normalizedCategory];
   }
-  
+
   // Case-insensitive partial match
   const lowerCategory = normalizedCategory.toLowerCase();
-  
+
   if (lowerCategory.includes('food') || lowerCategory.includes('groceries')) {
     return CATEGORY_COLORS['Food & Groceries'];
   }
@@ -42,7 +42,7 @@ export const getCategoryColor = (category: string): string => {
   if (lowerCategory.includes('education')) {
     return CATEGORY_COLORS['Education'];
   }
-  
+
   // Default color
   return CATEGORY_COLORS['Other'];
 };

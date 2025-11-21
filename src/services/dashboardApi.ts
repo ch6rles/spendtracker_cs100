@@ -56,7 +56,7 @@ export interface DashboardData {
 export const fetchDashboardData = async (): Promise<DashboardData> => {
   try {
     console.log('Fetching dashboard data from API...');
-    
+
     const response = await fetch(`${API_BASE_URL}/dashboard`, {
       method: 'GET',
       headers: {
@@ -128,7 +128,7 @@ export const fetchDashboardData = async (): Promise<DashboardData> => {
 export const fetchPieChartData = async (): Promise<PieChartData> => {
   try {
     console.log('Fetching pie chart data from API...');
-    
+
     const response = await fetch(`${API_BASE_URL}/expenses/pie`, {
       method: 'GET',
       headers: {
@@ -146,13 +146,13 @@ export const fetchPieChartData = async (): Promise<PieChartData> => {
 
     const rawData = await response.json();
     console.log('Pie chart raw data received:', rawData);
-    
+
     // Transform the API response format to our expected format
     // API returns: { category: negativeAmount, ... }
     // We need: { labels: [category...], data: [positiveAmount...] }
     const labels: string[] = [];
     const data: number[] = [];
-    
+
     // Convert categories to proper display names and make amounts positive
     const categoryMapping: { [key: string]: string } = {
       'entertainment': 'Entertainment',
@@ -165,17 +165,17 @@ export const fetchPieChartData = async (): Promise<PieChartData> => {
       'healthcare': 'Healthcare',
       'shopping': 'Shopping'
     };
-    
+
     Object.entries(rawData).forEach(([category, amount]) => {
       const displayName = categoryMapping[category.toLowerCase()] || category.charAt(0).toUpperCase() + category.slice(1);
       const positiveAmount = Math.abs(Number(amount));
-      
+
       if (positiveAmount > 0) {
         labels.push(displayName);
         data.push(positiveAmount);
       }
     });
-    
+
     const transformedData = { labels, data };
     console.log('Transformed pie chart data:', transformedData);
     return transformedData;

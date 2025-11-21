@@ -29,7 +29,7 @@ const getCategoryIcon = (category: string): string => {
     'Other': '💳',
     'default': '💳'
   };
-  
+
   // Convert category to lowercase for matching
   const lowerCategory = category.toLowerCase();
   return categoryMap[lowerCategory] || categoryMap['default'];
@@ -109,7 +109,7 @@ export interface DataResponse {
 export const fetchTransactionsData = async (): Promise<DataResponse> => {
   try {
     console.log('Fetching transactions data from API...');
-    
+
     const response = await fetch(`${API_BASE_URL}/transactions`, {
       method: 'GET',
       headers: {
@@ -127,7 +127,7 @@ export const fetchTransactionsData = async (): Promise<DataResponse> => {
 
     const rawData = await response.json();
     console.log('Raw transactions data received:', rawData);
-    
+
     // Transform the data to match our interface
     const transformedTransactions: Transaction[] = rawData.map((transaction: any) => ({
       ...transaction,

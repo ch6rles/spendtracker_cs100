@@ -47,7 +47,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-light);
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .transactions-controls {
@@ -75,8 +75,13 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-container h3 {

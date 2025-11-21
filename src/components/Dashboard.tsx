@@ -188,7 +188,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const getCategoryIcon = (category: string, description: string): string => {
     const lowerCategory = category.toLowerCase();
     const lowerDescription = description.toLowerCase();
-    
+
     // Check description for more specific matching
     if (lowerDescription.includes('grocery') || lowerDescription.includes('supermarket') || lowerDescription.includes('wholefoods') || lowerDescription.includes('trader')) {
       return '🛒';
@@ -217,7 +217,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     if (lowerDescription.includes('bobashop') || lowerDescription.includes('boba') || lowerDescription.includes('tea')) {
       return '🧋';
     }
-    
+
     // Fallback to category-based icons
     switch (lowerCategory) {
       case 'food & groceries':
@@ -251,7 +251,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         { icon: '🧋', name: 'Bobashop', date: '2025-10-05', amount: -8.50 }
       ];
     }
-    
+
     return dashboardData.recent.slice(0, 6).map(transaction => ({
       icon: getCategoryIcon(transaction.category, transaction.description),
       name: transaction.description,
@@ -471,8 +471,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="category-labels">
                 {categoryData.labels.map((label, index) => (
                   <div key={label} className="category-item">
-                    <div 
-                      className="color-dot" 
+                    <div
+                      className="color-dot"
                       style={{ backgroundColor: categoryData.datasets[0].backgroundColor[index] }}
                     ></div>
                     <span>{label}</span>

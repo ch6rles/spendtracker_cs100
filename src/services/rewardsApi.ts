@@ -39,7 +39,7 @@ export interface RewardsResponse {
 export const fetchRewardsData = async (): Promise<RewardsResponse> => {
   try {
     console.log('Fetching rewards data from API...');
-    
+
     const response = await fetch(`${API_BASE_URL}/rewards`, {
       method: 'GET',
       headers: {

@@ -20,7 +20,7 @@ export function Rewards() {
         setLoading(false)
       }
     }
-    
+
     loadRewards()
   }, [])
 
@@ -100,21 +100,21 @@ export function Rewards() {
             const cardDisplay = getCardTypeDisplay(rewardCard.card.issuer)
             const cardColor = getCardColor(rewardCard.card.issuer)
             const lastFourDigits = generateCardNumber(rewardCard.card.id)
-            
+
             // Generate rewards based on categories or use projected annual rewards
-            const rewards = Object.keys(rewardCard.rewardsByCategory).length > 0 
+            const rewards = Object.keys(rewardCard.rewardsByCategory).length > 0
               ? Object.entries(rewardCard.rewardsByCategory).map(([category, amount]) => ({
-                  name: `${category} (${(rewardCard.card.categoryRewardRates[category.toLowerCase()] * 100 || rewardCard.card.baseRewardRate * 100).toFixed(1)}x points)`,
-                  reward: `$${amount.toFixed(2)}`,
-                  color: index % 2 === 0 ? 'linear-gradient(135deg, #FF6B6B, #4ECDC4)' : 'linear-gradient(135deg, #96CEB4, #FECA57)',
-                  category: category
-                }))
+                name: `${category} (${(rewardCard.card.categoryRewardRates[category.toLowerCase()] * 100 || rewardCard.card.baseRewardRate * 100).toFixed(1)}x points)`,
+                reward: `$${amount.toFixed(2)}`,
+                color: index % 2 === 0 ? 'linear-gradient(135deg, #FF6B6B, #4ECDC4)' : 'linear-gradient(135deg, #96CEB4, #FECA57)',
+                category: category
+              }))
               : [{
-                  name: `${rewardCard.card.cardName} - ${rewardCard.recommendationReason}`,
-                  reward: `$${rewardCard.projectedAnnualRewards.toFixed(2)}`,
-                  color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
-                  category: 'General'
-                }]
+                name: `${rewardCard.card.cardName} - ${rewardCard.recommendationReason}`,
+                reward: `$${rewardCard.projectedAnnualRewards.toFixed(2)}`,
+                color: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
+                category: 'General'
+              }]
 
             return (
               <div key={index} className="card-rewards-group">

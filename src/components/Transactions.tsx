@@ -24,19 +24,19 @@ export function Transactions() {
         setLoading(false)
       }
     }
-    
+
     loadTransactions()
   }, [])
 
   const filteredTransactions = transactions.filter(transaction => {
     if (!searchTerm.trim()) return true; // Show all transactions if search is empty
-    
+
     const searchLower = searchTerm.toLowerCase().trim();
     const transactionName = (transaction.name || transaction.description).toLowerCase();
     const transactionId = transaction.id.toString().toLowerCase();
     const transactionCategory = transaction.category.toLowerCase();
     const transactionDescription = transaction.description.toLowerCase();
-    
+
     return (
       transactionName.includes(searchLower) ||
       transactionId.includes(searchLower) ||
@@ -53,21 +53,21 @@ export function Transactions() {
         const dateTimeA = a.time ? new Date(`${a.date} ${a.time}`) : new Date(a.date)
         const dateTimeB = b.time ? new Date(`${b.date} ${b.time}`) : new Date(b.date)
         return dateTimeB.getTime() - dateTimeA.getTime()
-      
+
       case 'Oldest':
         // Sort by date (oldest first), then by time if available
         const dateTimeA_old = a.time ? new Date(`${a.date} ${a.time}`) : new Date(a.date)
         const dateTimeB_old = b.time ? new Date(`${b.date} ${b.time}`) : new Date(b.date)
         return dateTimeA_old.getTime() - dateTimeB_old.getTime()
-      
+
       case 'Amount High':
         // Sort by amount (highest first)
         return b.amount - a.amount
-      
+
       case 'Amount Low':
         // Sort by amount (lowest first)
         return a.amount - b.amount
-      
+
       default:
         return 0
     }
@@ -185,14 +185,14 @@ export function Transactions() {
         </div>
 
         {searchTerm.trim() && (
-          <div className="search-results-info" style={{ 
-            padding: '10px 0', 
-            color: '#666', 
+          <div className="search-results-info" style={{
+            padding: '10px 0',
+            color: '#666',
             fontSize: '14px',
             borderBottom: '1px solid #eee',
             marginBottom: '10px'
           }}>
-            Found {sortedTransactions.length} transaction{sortedTransactions.length !== 1 ? 's' : ''} 
+            Found {sortedTransactions.length} transaction{sortedTransactions.length !== 1 ? 's' : ''}
             {sortedTransactions.length > 0 ? ` matching "${searchTerm}"` : ` for "${searchTerm}"`}
           </div>
         )}
@@ -213,8 +213,8 @@ export function Transactions() {
                 <div key={transaction.id} className="table-row">
                   <div className="column transaction-id">
                     <div className="transaction-id-wrapper">
-                      <div 
-                        className="category-indicator" 
+                      <div
+                        className="category-indicator"
                         style={{ backgroundColor: categoryColor }}
                         title={transaction.category}
                       />

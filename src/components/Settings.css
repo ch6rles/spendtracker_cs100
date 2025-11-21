@@ -10,7 +10,7 @@
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-light);
-  border: 1px solid rgba(255,255,255,0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .header-content {
@@ -59,7 +59,7 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-light);
-  border: 1px solid rgba(255,255,255,0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
 }
 
@@ -80,7 +80,7 @@
 .card-icon {
   width: 40px;
   height: 40px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
@@ -190,11 +190,11 @@
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--primary-blue);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(26px);
 }
 
@@ -316,26 +316,26 @@ input:checked + .slider:before {
   .settings {
     padding: var(--spacing-md);
   }
-  
+
   .settings-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  
+
   .header-content {
     flex-direction: column;
     text-align: center;
     gap: var(--spacing-sm);
   }
-  
+
   .theme-options {
     flex-direction: column;
   }
-  
+
   .data-actions {
     flex-direction: column;
   }
-  
+
   .app-links {
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -348,14 +348,10 @@ input:checked + .slider:before {
     align-items: flex-start;
     gap: var(--spacing-sm);
   }
-  
+
   .theme-options,
   .toggle,
   .setting-select {
     align-self: flex-end;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main
