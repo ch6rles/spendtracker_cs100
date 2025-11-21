@@ -451,3 +451,92 @@ export const fetchAccountsData = async (): Promise<AccountData[]> => {
     ];
   }
 };
+
+// Account-specific API functions
+
+// Fetch income analysis data for a specific account
+export const fetchAccountIncomeAnalysis = async (accountId: string): Promise<{ [key: string]: number }> => {
+  try {
+    console.log(`Fetching income analysis for account ${accountId}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/income/analysis/${accountId}`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountId} income analysis received:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching account ${accountId} income analysis:`, error);
+    return {};
+  }
+};
+
+// Fetch income prediction data for a specific account
+export const fetchAccountIncomePrediction = async (accountId: string): Promise<{ [key: string]: number }> => {
+  try {
+    console.log(`Fetching income prediction for account ${accountId}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/income/predict/${accountId}`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountId} income prediction received:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching account ${accountId} income prediction:`, error);
+    return {};
+  }
+};
+
+// Fetch expenses pie chart data for a specific account
+export const fetchAccountExpensesPie = async (accountId: string): Promise<{ [key: string]: number }> => {
+  try {
+    console.log(`Fetching expenses pie chart for account ${accountId}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/expenses/pie/${accountId}`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountId} expenses pie chart received:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching account ${accountId} expenses pie chart:`, error);
+    return {};
+  }
+};

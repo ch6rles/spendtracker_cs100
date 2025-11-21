@@ -12,7 +12,7 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
-import { fetchDashboardData, fetchPieChartData, fetchMonthlySpendingSummary, fetchAccountsData } from '../services/dashboardApi'
+import { fetchDashboardData, fetchPieChartData, fetchMonthlySpendingSummary, fetchAccountsData, fetchAccountIncomeAnalysis, fetchAccountIncomePrediction, fetchAccountExpensesPie } from '../services/dashboardApi'
 import type { DashboardData, PieChartData, MonthlySpendingSummary, AccountData } from '../services/dashboardApi'
 import { fetchRewardsData } from '../services/rewardsApi'
 import type { RewardsResponse } from '../services/rewardsApi'
@@ -155,9 +155,52 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAccount(event.target.value);
-    console.log('Selected account:', event.target.value);
+  const handleAccountChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const accountId = event.target.value;
+    setSelectedAccount(accountId);
+    console.log('Selected account:', accountId);
+    
+    // Load account-specific data
+    if (accountId && accountId !== 'all') {
+      try {
+        setLoading(true);
+        const [accountIncomeAnalysis, accountIncomePrediction, accountExpensesPie] = await Promise.all([
+          fetchAccountIncomeAnalysis(accountId),
+          fetchAccountIncomePrediction(accountId),
+          fetchAccountExpensesPie(accountId)
+        ]);
+        
+        // Transform account expenses data to PieChartData format
+        const transformedPieData: PieChartData = {
+          labels: Object.keys(accountExpensesPie),
+          data: Object.values(accountExpensesPie)
+        };
+        
+        // Update state with account-specific data
+        setIncomeAnalysis(accountIncomeAnalysis);
+        setIncomePrediction(accountIncomePrediction);
+        setPieChartData(transformedPieData);
+      } catch (error) {
+        console.error('Failed to load account-specific data:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Load default/all account data
+      try {
+        setLoading(true);
+        const [defaultPieData] = await Promise.all([
+          fetchPieChartData()
+        ]);
+        fetchIncomeAnalysis();
+        fetchIncomePrediction();
+        setPieChartData(defaultPieData);
+      } catch (error) {
+        console.error('Failed to load default data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   // Convert monthly spending data to chart format
