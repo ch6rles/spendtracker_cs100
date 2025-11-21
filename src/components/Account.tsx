@@ -11,7 +11,7 @@ export const Account: React.FC = () => {
             <User size={32} />
           </div>
           <div className="header-text">
-            <h1>Account Settings</h1>
+            <h1>Account Settings (No functionality)</h1>
             <p>Manage your profile and account preferences</p>
           </div>
         </div>
