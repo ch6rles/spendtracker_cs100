@@ -4,6 +4,7 @@ const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 const TRANSACTIONS_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/transactions';
 const INCOME_ANALYSIS = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/income/analysis';
 const PIE_CHART_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/expenses/pie';
+const ACCOUNTS_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/accounts';
 
 interface RecentTransaction {
   id: string;
@@ -21,6 +22,13 @@ export interface Transaction {
   description: string;
   amount: number;
   category: string;
+}
+
+export interface AccountData {
+  subscriptionPlan: string;
+  accountName: string;
+  balance: number;
+  accountNumber: string;
 }
 
 // Function to find the most recent and previous months from transaction data
@@ -398,5 +406,48 @@ export const fetchPieChartData = async (): Promise<PieChartData> => {
       labels: ['Food & Groceries', 'Transportation', 'Shopping', 'Entertainment', 'Other'],
       data: [45.50, 23.75, 67.80, 35.20, 15.30]
     };
+  }
+};
+
+export const fetchAccountsData = async (): Promise<AccountData[]> => {
+  try {
+    console.log('Fetching accounts data from API...');
+    
+    const response = await fetch(ACCOUNTS_API, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const accounts: AccountData[] = await response.json();
+    console.log('Accounts data received:', accounts);
+    return accounts;
+  } catch (error) {
+    console.error('Error fetching accounts data:', error);
+    console.log('Using fallback accounts data due to API error');
+    // Return fallback data if API fails
+    return [
+      {
+        subscriptionPlan: 'Basic',
+        accountName: 'Chase Checking',
+        balance: 5000,
+        accountNumber: 'acc-001'
+      },
+      {
+        subscriptionPlan: 'Basic',
+        accountName: 'Wells Fargo Savings',
+        balance: 10000,
+        accountNumber: 'acc-002'
+      }
+    ];
   }
 };

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Bell, User, X } from 'lucide-react'
-import { fetchTransactionsData } from '../services/transactionsApi'
+import { fetchTransactionsData, fetchAccountTransactions } from '../services/transactionsApi'
+import { fetchAccountsData } from '../services/dashboardApi'
 import type { Transaction } from '../services/transactionsApi'
+import type { AccountData } from '../services/dashboardApi'
 import './Transactions.css'
 
 export function Transactions() {
@@ -9,25 +11,58 @@ export function Transactions() {
   const [sortBy, setSortBy] = useState('Latest')
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [accountsData, setAccountsData] = useState<AccountData[]>([])
+  const [selectedAccount, setSelectedAccount] = useState<string>('all')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const loadTransactions = async () => {
+    const loadData = async () => {
       setLoading(true)
       try {
-        const data = await fetchTransactionsData()
-        setTransactions(data.transactions)
+        // Load both transactions and accounts data
+        const [transactionsData, accounts] = await Promise.all([
+          fetchTransactionsData(),
+          fetchAccountsData()
+        ])
+        
+        setTransactions(transactionsData.transactions)
+        setAccountsData(accounts)
       } catch (error) {
-        console.error('Failed to load transactions:', error)
+        console.error('Failed to load data:', error)
       } finally {
         setLoading(false)
       }
     }
     
-    loadTransactions()
+    loadData()
   }, [])
 
+  const handleAccountChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newAccount = event.target.value
+    setSelectedAccount(newAccount)
+    
+    // Reload transactions for the selected account
+    setLoading(true)
+    try {
+      let transactionsData
+      if (newAccount === 'all') {
+        // Load all transactions
+        const data = await fetchTransactionsData()
+        transactionsData = data.transactions
+      } else {
+        // Load transactions for specific account
+        transactionsData = await fetchAccountTransactions(newAccount)
+      }
+      setTransactions(transactionsData)
+    } catch (error) {
+      console.error('Failed to load transactions for account:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const filteredTransactions = transactions.filter(transaction => {
+    // Filter by search term only (account filtering is handled by loading specific data)
     if (!searchTerm.trim()) return true; // Show all transactions if search is empty
     
     const searchLower = searchTerm.toLowerCase().trim();
@@ -201,6 +236,20 @@ export function Transactions() {
               )}
             </div>
           </div>
+          <div className="account-filter-container">
+            <select
+              value={selectedAccount}
+              onChange={handleAccountChange}
+              className="account-filter-select"
+            >
+              <option value="all">All Accounts</option>
+              {accountsData.map((account) => (
+                <option key={account.accountNumber} value={account.accountNumber}>
+                  {account.accountName}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="sort-container">
             <select
               value={sortBy}
@@ -211,6 +260,20 @@ export function Transactions() {
               <option value="Oldest">Oldest</option>
               <option value="Amount High">Amount (High to Low)</option>
               <option value="Amount Low">Amount (Low to High)</option>
+            </select>
+          </div>
+          <div className="account-filter-container">
+            <select
+              value={selectedAccount}
+              onChange={handleAccountChange}
+              className="account-filter-select"
+            >
+              <option value="all">All Accounts</option>
+              {accountsData.map((account) => (
+                <option key={account.accountNumber} value={account.accountNumber}>
+                  {account.accountName}
+                </option>
+              ))}
             </select>
           </div>
         </div>

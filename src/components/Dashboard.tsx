@@ -12,8 +12,8 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
-import { fetchDashboardData, fetchPieChartData, fetchMonthlySpendingSummary } from '../services/dashboardApi'
-import type { DashboardData, PieChartData, MonthlySpendingSummary } from '../services/dashboardApi'
+import { fetchDashboardData, fetchPieChartData, fetchMonthlySpendingSummary, fetchAccountsData } from '../services/dashboardApi'
+import type { DashboardData, PieChartData, MonthlySpendingSummary, AccountData } from '../services/dashboardApi'
 import { fetchRewardsData } from '../services/rewardsApi'
 import type { RewardsResponse } from '../services/rewardsApi'
 import './Dashboard.css'
@@ -40,6 +40,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [rewardsData, setRewardsData] = useState<RewardsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [incomeAnalysis, setIncomeAnalysis] = useState<any>(null);
+  const [incomePrediction, setIncomePrediction] = useState<any>(null);
+  const [accountsData, setAccountsData] = useState<AccountData[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<string>('all'); // 'all' or accountNumber
   // Helper function for time-based greeting
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours()
@@ -74,17 +77,18 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const loadDashboardData = async () => {
       setLoading(true)
       try {
-        const [data, pieData, monthlyData, rewards] = await Promise.all([
+        const [data, pieData, monthlyData, rewards, accounts] = await Promise.all([
           fetchDashboardData(),
           fetchPieChartData(),
           fetchMonthlySpendingSummary(),
           fetchRewardsData(),
-
+          fetchAccountsData(),
         ])
         setDashboardData(data)
         setPieChartData(pieData)
         setMonthlySpending(monthlyData)
         setRewardsData(rewards)
+        setAccountsData(accounts)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
       } finally {
@@ -92,6 +96,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       }
     }
     fetchIncomeAnalysis()
+    fetchIncomePrediction()
     loadDashboardData()
 
   }, [])
@@ -114,11 +119,33 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     
         const rawData = await response.json();
         console.log('Raw income analysis data received:', rawData);
-        const myMap = new Map<string, any>(Object.entries(rawData));
-        const keyArray: string[] = Array.from(myMap.keys());
-        const valArray: number[] = Array.from(myMap.values());
         // Transform the data to match our interface
         setIncomeAnalysis(rawData);
+  }
+
+  const fetchIncomePrediction = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/income/predict`, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const rawPredictionData = await response.json();
+      console.log('Raw income prediction data received:', rawPredictionData);
+      setIncomePrediction(rawPredictionData);
+    } catch (error) {
+      console.error('Error fetching income prediction:', error);
+    }
   }
 
   const handleViewTransactions = () => {
@@ -128,19 +155,70 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
+  const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAccount(event.target.value);
+    console.log('Selected account:', event.target.value);
+  };
+
   // Convert monthly spending data to chart format
   const getIncomeData = () => {
-    if (incomeAnalysis) {
-       // const keys: string[] = [];
-       // const values: any[] = [];
-        const myMap = new Map<string, any>(Object.entries(incomeAnalysis ));
-        const keyArray: string[] = Array.from(myMap.keys());
-        const valArray: number[] = Array.from(myMap.values());
+    if (incomeAnalysis && incomePrediction) {
+      // Process historical income analysis data
+      const analysisMap = new Map<string, any>(Object.entries(incomeAnalysis));
+      const analysisKeys: string[] = Array.from(analysisMap.keys());
+      const analysisValues: number[] = Array.from(analysisMap.values());
+      
+      // Process prediction data
+      const predictionMap = new Map<string, any>(Object.entries(incomePrediction));
+      const predictionKeys: string[] = Array.from(predictionMap.keys());
+      const predictionValues: number[] = Array.from(predictionMap.values());
+      
+      // Combine labels and data
+      const combinedLabels = [...analysisKeys, ...predictionKeys];
+      
+      // Create seamless connection by overlapping the last historical point with first prediction point
+      const lastHistoricalValue = analysisValues[analysisValues.length - 1];
+      
+      // Historical data with the last point repeated to connect to predictions
+      const combinedAnalysisData = [...analysisValues, lastHistoricalValue, ...new Array(predictionKeys.length - 1).fill(null)];
+      
+      // Prediction data starting with the last historical value to create connection
+      const combinedPredictionData = [...new Array(analysisKeys.length).fill(null), lastHistoricalValue, ...predictionValues];
+      
+      return {
+        labels: combinedLabels,
+        datasets: [
+          {
+            label: 'Historical Income',
+            data: combinedAnalysisData,
+            borderColor: '#7ED321',
+            backgroundColor: 'rgba(126, 211, 33, 0.1)',
+            tension: 0.4,
+            pointStyle: 'circle',
+            spanGaps: false, // Don't connect across null values
+          },
+          {
+            label: 'Predicted Income',
+            data: combinedPredictionData,
+            borderColor: '#FF6B6B',
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+            borderDash: [5, 5], // Dashed line for predictions
+            tension: 0.4,
+            pointStyle: 'triangle',
+            spanGaps: false, // Don't connect across null values
+          },
+        ],
+      }
+    } else if (incomeAnalysis) {
+      // Fallback to just historical data if prediction isn't available yet
+      const analysisMap = new Map<string, any>(Object.entries(incomeAnalysis));
+      const keyArray: string[] = Array.from(analysisMap.keys());
+      const valArray: number[] = Array.from(analysisMap.values());
       return {
         labels: keyArray,
         datasets: [
           {
-            label: 'Spending',
+            label: 'Historical Income',
             data: valArray,
             borderColor: '#7ED321',
             backgroundColor: 'rgba(126, 211, 33, 0.1)',
@@ -358,11 +436,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <header className="dashboard-header">
         <h1 style={{ color: "white" }}>Dashboard</h1>
         <div className="header-left">
-
-          <select className="account-selector">
-            <option>All Accounts</option>
-            <option>Checking Account</option>
-            <option>Savings Account</option>
+          <select 
+            className="account-selector"
+            value={selectedAccount}
+            onChange={handleAccountChange}
+          >
+            <option value="all">All Accounts</option>
+            {accountsData.map((account) => (
+              <option key={account.accountNumber} value={account.accountNumber}>
+                {account.accountName}
+              </option>
+            ))}
           </select>
         </div>
         <div className="header-right">
@@ -409,7 +493,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <div className="dashboard-content">
         <div className="chart-section">
           <div className="income-analysis">
-            <h2>Income Analysis</h2>
+            <h2>Income Analysis & Predictions</h2>
             <div className="chart-container">
               <Line
                 data={incomeData}
@@ -418,7 +502,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   maintainAspectRatio: false,
                   plugins: {
                     legend: {
-                      display: false,
+                      display: true,
+                      position: 'top' as const,
                     },
                   },
                   scales: {

@@ -35,6 +35,40 @@ const getCategoryIcon = (category: string): string => {
   return categoryMap[lowerCategory] || categoryMap['default'];
 };
 
+// Helper function to assign account to transactions
+const assignAccountToTransaction = (transaction: any, index: number): string => {
+  const accounts = ['acc-001', 'acc-002', 'acc-003', 'acc-004', 'acc-005', 'acc-006', 'acc-007'];
+  
+  // Assign accounts based on transaction patterns for demonstration
+  // In a real app, this would come from the API
+  if (transaction.category?.toLowerCase().includes('food') || 
+      transaction.category?.toLowerCase().includes('groceries') ||
+      transaction.description?.toLowerCase().includes('starbucks') ||
+      transaction.description?.toLowerCase().includes('wholefoods')) {
+    return 'acc-002'; // Chase Sapphire Card for food/dining
+  }
+  
+  if (transaction.category?.toLowerCase().includes('transport') ||
+      transaction.category?.toLowerCase().includes('gas') ||
+      transaction.description?.toLowerCase().includes('gas') ||
+      transaction.description?.toLowerCase().includes('uber')) {
+    return 'acc-003'; // Amex Gold Card for transportation
+  }
+  
+  if (transaction.amount > 0) {
+    // Positive amounts (deposits/income) go to checking accounts
+    return index % 2 === 0 ? 'acc-001' : 'acc-006'; // Chase Checking or Wells Fargo Checking
+  }
+  
+  if (transaction.amount > -100) {
+    // Small purchases go to credit cards
+    return index % 2 === 0 ? 'acc-005' : 'acc-007'; // Citi Double Cash or Discover Card
+  }
+  
+  // Larger purchases go to checking accounts or savings
+  return index % 3 === 0 ? 'acc-001' : (index % 3 === 1 ? 'acc-004' : 'acc-006');
+};
+
 // Helper function to generate time from date or use current time
 const generateTime = (): string => {
   const now = new Date();
@@ -129,8 +163,9 @@ export const fetchTransactionsData = async (): Promise<DataResponse> => {
     console.log('Raw transactions data received:', rawData);
     
     // Transform the data to match our interface
-    const transformedTransactions: Transaction[] = rawData.map((transaction: any) => ({
+    const transformedTransactions: Transaction[] = rawData.map((transaction: any, index: number) => ({
       ...transaction,
+      accountId: assignAccountToTransaction(transaction, index), // Assign account based on transaction patterns
       name: transaction.description, // Use description as name for UI
       time: generateTime(), // Generate a time since API doesn't provide it
       icon: getCategoryIcon(transaction.category) // Map category to icon
@@ -188,61 +223,6 @@ export const fetchTransactionsData = async (): Promise<DataResponse> => {
           name: 'Transfer from bank',
           time: '09:09 AM',
           icon: '🏦'
-        },
-        {
-          id: 2,
-          accountId: 'ACC-001',
-          description: 'Fishing equipment store',
-          amount: -85.50,
-          date: 'October 18, 2025',
-          category: 'Shopping',
-          name: 'Fishing equipment store',
-          time: '02:15 PM',
-          icon: '🛍️'
-        },
-        {
-          id: 3,
-          accountId: 'ACC-001',
-          description: 'Focus Coffee Shop',
-          amount: -12.75,
-          date: 'October 17, 2025',
-          category: 'Food & Groceries',
-          name: 'Focus Coffee Shop',
-          time: '08:30 AM',
-          icon: '🍎'
-        },
-        {
-          id: 4,
-          accountId: 'ACC-001',
-          description: 'Fuel station',
-          amount: -45.20,
-          date: 'October 16, 2025',
-          category: 'Transportation',
-          name: 'Fuel station',
-          time: '06:45 PM',
-          icon: '🚗'
-        },
-        {
-          id: 5,
-          accountId: 'ACC-001',
-          description: 'Fresh Market',
-          amount: -32.40,
-          date: 'October 15, 2025',
-          category: 'Food & Groceries',
-          name: 'Fresh Market',
-          time: '11:20 AM',
-          icon: '🍎'
-        },
-        {
-          id: 6,
-          accountId: 'ACC-001',
-          description: 'Netflix subscription',
-          amount: -15.99,
-          date: 'October 14, 2025',
-          category: 'Entertainment',
-          name: 'Netflix subscription',
-          time: '12:01 AM',
-          icon: '🎬'
         }
       ],
       dashboard: {
@@ -289,5 +269,49 @@ export const fetchTransactionsData = async (): Promise<DataResponse> => {
         ]
       }
     };
+  }
+};
+
+// Fetch transactions for a specific account
+export const fetchAccountTransactions = async (accountNumber: string): Promise<Transaction[]> => {
+  try {
+    console.log(`Fetching transactions for account ${accountNumber}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/accounts/${accountNumber}/transactions`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountNumber} transactions received:`, data);
+
+    // Transform transactions to match our interface
+    const transformedTransactions = data.map((transaction: any) => ({
+      id: transaction.id,
+      accountId: transaction.accountId,
+      date: transaction.date,
+      description: transaction.description,
+      amount: transaction.amount,
+      category: transaction.category,
+      icon: getCategoryIcon(transaction.category),
+      name: transaction.description, // Use description as name for consistency
+      time: generateTime() // Generate time since API doesn't provide it
+    }));
+
+    return transformedTransactions;
+  } catch (error) {
+    console.error(`Error fetching account ${accountNumber} transactions:`, error);
+    // Return empty array if API fails
+    return [];
   }
 };
