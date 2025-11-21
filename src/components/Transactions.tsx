@@ -262,20 +262,6 @@ export function Transactions() {
               <option value="Amount Low">Amount (Low to High)</option>
             </select>
           </div>
-          <div className="account-filter-container">
-            <select
-              value={selectedAccount}
-              onChange={handleAccountChange}
-              className="account-filter-select"
-            >
-              <option value="all">All Accounts</option>
-              {accountsData.map((account) => (
-                <option key={account.accountNumber} value={account.accountNumber}>
-                  {account.accountName}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {searchTerm.trim() && (
