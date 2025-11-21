@@ -86,13 +86,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     });
 
     if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-    
-        const rawData = await response.json();
-        console.log('Raw income analysis data received:', rawData);
-        // Transform the data to match our interface
-        setIncomeAnalysis(rawData);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const rawData = await response.json();
+    console.log('Raw income analysis data received:', rawData);
+    // Transform the data to match our interface
+    setIncomeAnalysis(rawData);
   }
 
   const fetchIncomePrediction = async () => {
@@ -111,7 +111,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const rawPredictionData = await response.json();
       console.log('Raw income prediction data received:', rawPredictionData);
       setIncomePrediction(rawPredictionData);
@@ -131,7 +131,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const accountId = event.target.value;
     setSelectedAccount(accountId);
     console.log('Selected account:', accountId);
-    
+
     // Load account-specific data
     if (accountId && accountId !== 'all') {
       try {
@@ -141,13 +141,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           fetchAccountIncomePrediction(accountId),
           fetchAccountExpensesPie(accountId)
         ]);
-        
+
         // Transform account expenses data to PieChartData format
         const transformedPieData: PieChartData = {
           labels: Object.keys(accountExpensesPie),
           data: Object.values(accountExpensesPie)
         };
-        
+
         // Update state with account-specific data
         setIncomeAnalysis(accountIncomeAnalysis);
         setIncomePrediction(accountIncomePrediction);
@@ -182,24 +182,24 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       const analysisMap = new Map<string, any>(Object.entries(incomeAnalysis));
       const analysisKeys: string[] = Array.from(analysisMap.keys());
       const analysisValues: number[] = Array.from(analysisMap.values());
-      
+
       // Process prediction data
       const predictionMap = new Map<string, any>(Object.entries(incomePrediction));
       const predictionKeys: string[] = Array.from(predictionMap.keys());
       const predictionValues: number[] = Array.from(predictionMap.values());
-      
+
       // Combine labels and data
       const combinedLabels = [...analysisKeys, ...predictionKeys];
-      
+
       // Create seamless connection by overlapping the last historical point with first prediction point
       const lastHistoricalValue = analysisValues[analysisValues.length - 1];
-      
+
       // Historical data with the last point repeated to connect to predictions
       const combinedAnalysisData = [...analysisValues, lastHistoricalValue, ...new Array(predictionKeys.length - 1).fill(null)];
-      
+
       // Prediction data starting with the last historical value to create connection
       const combinedPredictionData = [...new Array(analysisKeys.length).fill(null), lastHistoricalValue, ...predictionValues];
-      
+
       return {
         labels: combinedLabels,
         datasets: [
@@ -245,12 +245,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
     const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const spendingData = new Array(12).fill(0)
-/*
-    dashboardData.monthlySpending.forEach(monthData => {
-      const month = new Date(monthData.month).getMonth()
-      spendingData[month] = monthData.totalSpent
-    })
-      */
+    /*
+        dashboardData.monthlySpending.forEach(monthData => {
+          const month = new Date(monthData.month).getMonth()
+          spendingData[month] = monthData.totalSpent
+        })
+          */
 
     return {
       labels: monthLabels,
@@ -324,7 +324,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const getCategoryIcon = (category: string, description: string): string => {
     const lowerCategory = category.toLowerCase();
     const lowerDescription = description.toLowerCase();
-    
+
     // Check description for more specific matching
     if (lowerDescription.includes('grocery') || lowerDescription.includes('supermarket') || lowerDescription.includes('wholefoods') || lowerDescription.includes('trader')) {
       return '🛒';
@@ -353,7 +353,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     if (lowerDescription.includes('bobashop') || lowerDescription.includes('boba') || lowerDescription.includes('tea')) {
       return '🧋';
     }
-    
+
     // Fallback to category-based icons
     switch (lowerCategory) {
       case 'food & groceries':
@@ -387,7 +387,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         { icon: '🧋', name: 'Bobashop', date: '2025-10-05', amount: -8.50 }
       ];
     }
-    
+
     return dashboardData.recent.slice(0, 6).map(transaction => ({
       icon: getCategoryIcon(transaction.category, transaction.description),
       name: transaction.description,
@@ -451,7 +451,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <header className="dashboard-header">
         <h1 style={{ color: "white" }}>Dashboard</h1>
         <div className="header-left">
-          <select 
+          <select
             className="account-selector"
             value={selectedAccount}
             onChange={handleAccountChange}
@@ -478,6 +478,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="welcome-content">
           <h2>{getTimeBasedGreeting()}, Nhien! 👋</h2>
           <p>Here's your financial snapshot for today</p>
+          <div className="motivational-quote">
+            "Small steps every day lead to big results. Keep moving forward!"
+          </div>
         </div>
       </div>
 
