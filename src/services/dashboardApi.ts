@@ -1,5 +1,11 @@
 const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
+// API endpoints
+const TRANSACTIONS_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/transactions';
+const INCOME_ANALYSIS = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/income/analysis';
+const PIE_CHART_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/expenses/pie';
+const ACCOUNTS_API = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api/accounts';
+
 interface RecentTransaction {
   id: string;
   accountId: string | null;
@@ -7,6 +13,87 @@ interface RecentTransaction {
   description: string;
   amount: number;
   category: string;
+}
+
+export interface Transaction {
+  id: string;
+  accountId: string | null;
+  date: string;
+  description: string;
+  amount: number;
+  category: string;
+}
+
+export interface AccountData {
+  subscriptionPlan: string;
+  accountName: string;
+  balance: number;
+  accountNumber: string;
+}
+
+// Function to find the most recent and previous months from transaction data
+const findMostRecentMonths = (transactions: Transaction[]): { currentMonth: Date, previousMonth: Date } => {
+  // Extract all unique year-month combinations from transactions
+  const monthYearSet = new Set<string>();
+  
+  transactions.forEach(transaction => {
+    const date = new Date(transaction.date);
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    monthYearSet.add(yearMonth);
+  });
+  
+  // Sort the year-month strings in descending order to get most recent first
+  const sortedMonths = Array.from(monthYearSet).sort().reverse();
+  
+  if (sortedMonths.length === 0) {
+    // Fallback to current date if no transactions found
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return { currentMonth, previousMonth };
+  }
+  
+  // Get the most recent month
+  const [recentYear, recentMonth] = sortedMonths[0].split('-').map(Number);
+  const currentMonth = new Date(recentYear, recentMonth - 1, 1);
+  
+  // Get the previous month
+  let previousMonth: Date;
+  if (sortedMonths.length > 1) {
+    const [prevYear, prevMonth] = sortedMonths[1].split('-').map(Number);
+    previousMonth = new Date(prevYear, prevMonth - 1, 1);
+  } else {
+    // If only one month of data, calculate previous month
+    previousMonth = new Date(recentYear, recentMonth - 2, 1);
+  }
+  
+  console.log('Most recent month found:', currentMonth.toDateString());
+  console.log('Previous month found:', previousMonth.toDateString());
+  
+  return { currentMonth, previousMonth };
+};
+
+export interface MonthlySpendingSummary {
+  currentMonth: {
+    month: string;
+    year: number;
+    totalSpent: number;
+    totalIncome: number;
+    netAmount: number;
+  };
+  previousMonth: {
+    month: string;
+    year: number;
+    totalSpent: number;
+    totalIncome: number;
+    netAmount: number;
+  };
+  comparison: {
+    spendingChange: number;
+    spendingChangePercent: number;
+    incomeChange: number;
+    incomeChangePercent: number;
+  };
 }
 
 export interface PieChartData {
@@ -125,11 +212,148 @@ export const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 };
 
+export const fetchMonthlySpendingSummary = async (): Promise<MonthlySpendingSummary> => {
+  try {
+    console.log('Fetching transactions for monthly spending summary...');
+    
+    const response = await fetch(TRANSACTIONS_API, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const transactions: Transaction[] = await response.json();
+    console.log('Transactions received:', transactions.length);
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    // Dynamically find the most recent and previous months from transaction data
+    const { currentMonth, previousMonth } = findMostRecentMonths(transactions);
+    
+    const currentYear = currentMonth.getFullYear();
+    const currentMonthIndex = currentMonth.getMonth();
+    const previousYear = previousMonth.getFullYear();
+    const previousMonthIndex = previousMonth.getMonth();
+    
+    console.log('Current month:', monthNames[currentMonthIndex], currentYear);
+    console.log('Previous month:', monthNames[previousMonthIndex], previousYear);
+    
+    // Filter transactions for current and previous month
+    const currentMonthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return transactionDate.getFullYear() === currentYear && 
+             transactionDate.getMonth() === currentMonthIndex;
+    });
+    
+    const previousMonthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return transactionDate.getFullYear() === previousYear && 
+             transactionDate.getMonth() === previousMonthIndex;
+    });
+    
+    console.log(`Found ${currentMonthTransactions.length} transactions for ${monthNames[currentMonthIndex]} ${currentYear}`);
+    console.log(`Found ${previousMonthTransactions.length} transactions for ${monthNames[previousMonthIndex]} ${previousYear}`);
+    
+    // Calculate totals for current month - include ALL negative amounts (expenses)
+    const currentMonthExpenses = currentMonthTransactions.filter(t => t.amount < 0);
+    const currentMonthSpent = currentMonthExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const currentMonthIncome = currentMonthTransactions
+      .filter(t => t.amount > 0 && (t.category === 'income' || t.description.toLowerCase().includes('salary') || t.description.toLowerCase().includes('paycheck')))
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    // Calculate totals for previous month (using same logic)
+    const previousMonthExpenses = previousMonthTransactions.filter(t => t.amount < 0);
+    const previousMonthSpent = previousMonthExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const previousMonthIncome = previousMonthTransactions
+      .filter(t => t.amount > 0 && (t.category === 'income' || t.description.toLowerCase().includes('salary') || t.description.toLowerCase().includes('paycheck')))
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    console.log(`${monthNames[currentMonthIndex]} ${currentYear} - Spent: $${currentMonthSpent.toFixed(2)}, Income: $${currentMonthIncome.toFixed(2)}`);
+    console.log(`${monthNames[previousMonthIndex]} ${previousYear} - Spent: $${previousMonthSpent.toFixed(2)}, Income: $${previousMonthIncome.toFixed(2)}`);
+    
+    // Calculate changes
+    const spendingChange = currentMonthSpent - previousMonthSpent;
+    const spendingChangePercent = previousMonthSpent > 0 ? ((spendingChange / previousMonthSpent) * 100) : 0;
+    const incomeChange = currentMonthIncome - previousMonthIncome;
+    const incomeChangePercent = previousMonthIncome > 0 ? ((incomeChange / previousMonthIncome) * 100) : 0;
+    
+    const summary: MonthlySpendingSummary = {
+      currentMonth: {
+        month: monthNames[currentMonthIndex],
+        year: currentYear,
+        totalSpent: currentMonthSpent,
+        totalIncome: currentMonthIncome,
+        netAmount: currentMonthIncome - currentMonthSpent
+      },
+      previousMonth: {
+        month: monthNames[previousMonthIndex],
+        year: previousYear,
+        totalSpent: previousMonthSpent,
+        totalIncome: previousMonthIncome,
+        netAmount: previousMonthIncome - previousMonthSpent
+      },
+      comparison: {
+        spendingChange,
+        spendingChangePercent,
+        incomeChange,
+        incomeChangePercent
+      }
+    };
+    
+    console.log('Monthly spending summary:', summary);
+    return summary;
+  } catch (error) {
+    console.error('Error fetching monthly spending summary:', error);
+    console.log('Using fallback monthly spending data due to API error');
+    
+    // Return fallback data if API fails
+    return {
+      currentMonth: {
+        month: 'November',
+        year: 2024,
+        totalSpent: 307.55,
+        totalIncome: 8000.00,
+        netAmount: 7692.45
+      },
+      previousMonth: {
+        month: 'October',
+        year: 2024,
+        totalSpent: 284.30,
+        totalIncome: 8000.00,
+        netAmount: 7715.70
+      },
+      comparison: {
+        spendingChange: 23.25,
+        spendingChangePercent: 8.18,
+        incomeChange: 0,
+        incomeChangePercent: 0
+      }
+    };
+  }
+};
+
 export const fetchPieChartData = async (): Promise<PieChartData> => {
   try {
     console.log('Fetching pie chart data from API...');
+<<<<<<< HEAD
 
     const response = await fetch(`${API_BASE_URL}/expenses/pie`, {
+=======
+    
+    const response = await fetch(PIE_CHART_API, {
+>>>>>>> main
       method: 'GET',
       headers: {
         'ngrok-skip-browser-warning': 'true',
@@ -187,5 +411,137 @@ export const fetchPieChartData = async (): Promise<PieChartData> => {
       labels: ['Food & Groceries', 'Transportation', 'Shopping', 'Entertainment', 'Other'],
       data: [45.50, 23.75, 67.80, 35.20, 15.30]
     };
+  }
+};
+
+export const fetchAccountsData = async (): Promise<AccountData[]> => {
+  try {
+    console.log('Fetching accounts data from API...');
+    
+    const response = await fetch(ACCOUNTS_API, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const accounts: AccountData[] = await response.json();
+    console.log('Accounts data received:', accounts);
+    return accounts;
+  } catch (error) {
+    console.error('Error fetching accounts data:', error);
+    console.log('Using fallback accounts data due to API error');
+    // Return fallback data if API fails
+    return [
+      {
+        subscriptionPlan: 'Basic',
+        accountName: 'Chase Checking',
+        balance: 5000,
+        accountNumber: 'acc-001'
+      },
+      {
+        subscriptionPlan: 'Basic',
+        accountName: 'Wells Fargo Savings',
+        balance: 10000,
+        accountNumber: 'acc-002'
+      }
+    ];
+  }
+};
+
+// Account-specific API functions
+
+// Fetch income analysis data for a specific account
+export const fetchAccountIncomeAnalysis = async (accountId: string): Promise<{ [key: string]: number }> => {
+  try {
+    console.log(`Fetching income analysis for account ${accountId}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/income/analysis/${accountId}`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountId} income analysis received:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching account ${accountId} income analysis:`, error);
+    return {};
+  }
+};
+
+// Fetch income prediction data for a specific account
+export const fetchAccountIncomePrediction = async (accountId: string): Promise<{ [key: string]: number }> => {
+  try {
+    console.log(`Fetching income prediction for account ${accountId}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/income/predict/${accountId}`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountId} income prediction received:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching account ${accountId} income prediction:`, error);
+    return {};
+  }
+};
+
+// Fetch expenses pie chart data for a specific account
+export const fetchAccountExpensesPie = async (accountId: string): Promise<{ [key: string]: number }> => {
+  try {
+    console.log(`Fetching expenses pie chart for account ${accountId}...`);
+    
+    const response = await fetch(`${API_BASE_URL}/expenses/pie/${accountId}`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Account ${accountId} expenses pie chart received:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching account ${accountId} expenses pie chart:`, error);
+    return {};
   }
 };

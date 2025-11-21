@@ -13,8 +13,8 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
-import { fetchDashboardData, fetchPieChartData } from '../services/dashboardApi'
-import type { DashboardData, PieChartData } from '../services/dashboardApi'
+import { fetchDashboardData, fetchPieChartData, fetchAccountsData, fetchAccountIncomeAnalysis, fetchAccountIncomePrediction, fetchAccountExpensesPie } from '../services/dashboardApi'
+import type { DashboardData, PieChartData, AccountData } from '../services/dashboardApi'
 import './Dashboard.css'
 
 ChartJS.register(
@@ -38,7 +38,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [pieChartData, setPieChartData] = useState<PieChartData | null>(null)
   const [loading, setLoading] = useState(true)
-
+  const [incomeAnalysis, setIncomeAnalysis] = useState<any>(null);
+  const [incomePrediction, setIncomePrediction] = useState<any>(null);
+  const [accountsData, setAccountsData] = useState<AccountData[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<string>('all'); // 'all' or accountNumber
   // Helper function for time-based greeting
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours()
@@ -47,42 +50,78 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     return 'Good evening'
   }
 
-  // Calculate quick stats
-  const getQuickStats = () => {
-    if (!dashboardData) return null
-
-    const thisMonthSpending = dashboardData.monthlySpending?.[0]?.totalSpent || 0
-    const lastMonthSpending = dashboardData.monthlySpending?.[1]?.totalSpent || 0
-    const change = thisMonthSpending - lastMonthSpending
-    const changePercent = lastMonthSpending ? ((change / lastMonthSpending) * 100) : 0
-
-    return {
-      thisMonth: thisMonthSpending,
-      change: change,
-      changePercent: changePercent,
-      isPositive: change >= 0
-    }
-  }
+  const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true)
       try {
-        const [data, pieData] = await Promise.all([
+        const [data, pieData, accounts] = await Promise.all([
           fetchDashboardData(),
-          fetchPieChartData()
+          fetchPieChartData(),
+          fetchAccountsData(),
         ])
         setDashboardData(data)
         setPieChartData(pieData)
+        setAccountsData(accounts)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
       } finally {
         setLoading(false)
       }
     }
-
+    fetchIncomeAnalysis()
+    fetchIncomePrediction()
     loadDashboardData()
+
   }, [])
+
+  const fetchIncomeAnalysis = async () => {
+    const response = await fetch(`${API_BASE_URL}/income/analysis`, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    
+        const rawData = await response.json();
+        console.log('Raw income analysis data received:', rawData);
+        // Transform the data to match our interface
+        setIncomeAnalysis(rawData);
+  }
+
+  const fetchIncomePrediction = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/income/predict`, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const rawPredictionData = await response.json();
+      console.log('Raw income prediction data received:', rawPredictionData);
+      setIncomePrediction(rawPredictionData);
+    } catch (error) {
+      console.error('Error fetching income prediction:', error);
+    }
+  }
 
   const handleViewTransactions = () => {
     console.log('handleViewTransactions called, onNavigate:', onNavigate);
@@ -91,15 +130,114 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
+  const handleAccountChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const accountId = event.target.value;
+    setSelectedAccount(accountId);
+    console.log('Selected account:', accountId);
+    
+    // Load account-specific data
+    if (accountId && accountId !== 'all') {
+      try {
+        setLoading(true);
+        const [accountIncomeAnalysis, accountIncomePrediction, accountExpensesPie] = await Promise.all([
+          fetchAccountIncomeAnalysis(accountId),
+          fetchAccountIncomePrediction(accountId),
+          fetchAccountExpensesPie(accountId)
+        ]);
+        
+        // Transform account expenses data to PieChartData format
+        const transformedPieData: PieChartData = {
+          labels: Object.keys(accountExpensesPie),
+          data: Object.values(accountExpensesPie)
+        };
+        
+        // Update state with account-specific data
+        setIncomeAnalysis(accountIncomeAnalysis);
+        setIncomePrediction(accountIncomePrediction);
+        setPieChartData(transformedPieData);
+      } catch (error) {
+        console.error('Failed to load account-specific data:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Load default/all account data
+      try {
+        setLoading(true);
+        const [defaultPieData] = await Promise.all([
+          fetchPieChartData()
+        ]);
+        fetchIncomeAnalysis();
+        fetchIncomePrediction();
+        setPieChartData(defaultPieData);
+      } catch (error) {
+        console.error('Failed to load default data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   // Convert monthly spending data to chart format
   const getIncomeData = () => {
-    if (!dashboardData?.monthlySpending) {
+    if (incomeAnalysis && incomePrediction) {
+      // Process historical income analysis data
+      const analysisMap = new Map<string, any>(Object.entries(incomeAnalysis));
+      const analysisKeys: string[] = Array.from(analysisMap.keys());
+      const analysisValues: number[] = Array.from(analysisMap.values());
+      
+      // Process prediction data
+      const predictionMap = new Map<string, any>(Object.entries(incomePrediction));
+      const predictionKeys: string[] = Array.from(predictionMap.keys());
+      const predictionValues: number[] = Array.from(predictionMap.values());
+      
+      // Combine labels and data
+      const combinedLabels = [...analysisKeys, ...predictionKeys];
+      
+      // Create seamless connection by overlapping the last historical point with first prediction point
+      const lastHistoricalValue = analysisValues[analysisValues.length - 1];
+      
+      // Historical data with the last point repeated to connect to predictions
+      const combinedAnalysisData = [...analysisValues, lastHistoricalValue, ...new Array(predictionKeys.length - 1).fill(null)];
+      
+      // Prediction data starting with the last historical value to create connection
+      const combinedPredictionData = [...new Array(analysisKeys.length).fill(null), lastHistoricalValue, ...predictionValues];
+      
       return {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        labels: combinedLabels,
         datasets: [
           {
-            label: 'Spending',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            label: 'Historical Income',
+            data: combinedAnalysisData,
+            borderColor: '#7ED321',
+            backgroundColor: 'rgba(126, 211, 33, 0.1)',
+            tension: 0.4,
+            pointStyle: 'circle',
+            spanGaps: false, // Don't connect across null values
+          },
+          {
+            label: 'Predicted Income',
+            data: combinedPredictionData,
+            borderColor: '#FF6B6B',
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+            borderDash: [5, 5], // Dashed line for predictions
+            tension: 0.4,
+            pointStyle: 'triangle',
+            spanGaps: false, // Don't connect across null values
+          },
+        ],
+      }
+    } else if (incomeAnalysis) {
+      // Fallback to just historical data if prediction isn't available yet
+      const analysisMap = new Map<string, any>(Object.entries(incomeAnalysis));
+      const keyArray: string[] = Array.from(analysisMap.keys());
+      const valArray: number[] = Array.from(analysisMap.values());
+      return {
+        labels: keyArray,
+        datasets: [
+          {
+            label: 'Historical Income',
+            data: valArray,
             borderColor: '#7ED321',
             backgroundColor: 'rgba(126, 211, 33, 0.1)',
             tension: 0.4,
@@ -110,11 +248,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
     const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const spendingData = new Array(12).fill(0)
-
+/*
     dashboardData.monthlySpending.forEach(monthData => {
       const month = new Date(monthData.month).getMonth()
       spendingData[month] = monthData.totalSpent
     })
+      */
 
     return {
       labels: monthLabels,
@@ -315,10 +454,24 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <header className="dashboard-header">
         <h1 style={{ color: "white" }}>Dashboard</h1>
         <div className="header-left">
+<<<<<<< HEAD
           <select className="account-selector">
             <option>All Accounts</option>
             <option>Checking Account</option>
             <option>Savings Account</option>
+=======
+          <select 
+            className="account-selector"
+            value={selectedAccount}
+            onChange={handleAccountChange}
+          >
+            <option value="all">All Accounts</option>
+            {accountsData.map((account) => (
+              <option key={account.accountNumber} value={account.accountNumber}>
+                {account.accountName}
+              </option>
+            ))}
+>>>>>>> main
           </select>
         </div>
         <div className="header-right">
@@ -336,30 +489,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <h2>{getTimeBasedGreeting()}, Nhien! 👋</h2>
           <p>Here's your financial snapshot for today</p>
         </div>
-        {getQuickStats() && (
-          <div className="quick-stats">
-            <div className="stat-card">
-              <div className="stat-value">${getQuickStats()?.thisMonth.toFixed(2)}</div>
-              <div className="stat-label">Spent this month</div>
-            </div>
-            <div className="stat-card">
-              <div className={`stat-value ${getQuickStats()?.isPositive ? 'negative' : 'positive'}`}>
-                {getQuickStats()?.isPositive ? '+' : ''}${Math.abs(getQuickStats()?.change || 0).toFixed(2)}
-              </div>
-              <div className="stat-label">vs last month</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{accounts.length}</div>
-              <div className="stat-label">Active accounts</div>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="dashboard-content">
         <div className="chart-section">
           <div className="income-analysis">
-            <h2>Income Analysis</h2>
+            <h2>Income Analysis & Predictions</h2>
             <div className="chart-container">
               <Line
                 data={incomeData}
@@ -368,7 +503,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   maintainAspectRatio: false,
                   plugins: {
                     legend: {
-                      display: false,
+                      display: true,
+                      position: 'top' as const,
                     },
                   },
                   scales: {
