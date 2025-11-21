@@ -38,15 +38,15 @@ export const Account: React.FC = () => {
                 <div className="profile-details">
                   <div className="form-group">
                     <label>Full Name</label>
-                    <input type="text" value="John Doe" readOnly />
+                    <input type="text" value="Nhien Pham" readOnly />
                   </div>
                   <div className="form-group">
                     <label>Email Address</label>
-                    <input type="email" value="john.doe@email.com" readOnly />
+                    <input type="email" value="nhien.pham@email.com" readOnly />
                   </div>
                   <div className="form-group">
                     <label>Phone Number</label>
-                    <input type="tel" value="+1 (555) 123-4567" readOnly />
+                    <input type="tel" value="+1 (312) 123-3899" readOnly />
                   </div>
                 </div>
               </div>
