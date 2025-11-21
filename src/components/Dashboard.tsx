@@ -12,10 +12,8 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Bell, User, ChevronDown } from 'lucide-react'
-import { fetchDashboardData, fetchPieChartData, fetchMonthlySpendingSummary, fetchAccountsData, fetchAccountIncomeAnalysis, fetchAccountIncomePrediction, fetchAccountExpensesPie } from '../services/dashboardApi'
-import type { DashboardData, PieChartData, MonthlySpendingSummary, AccountData } from '../services/dashboardApi'
-import { fetchRewardsData } from '../services/rewardsApi'
-import type { RewardsResponse } from '../services/rewardsApi'
+import { fetchDashboardData, fetchPieChartData, fetchAccountsData, fetchAccountIncomeAnalysis, fetchAccountIncomePrediction, fetchAccountExpensesPie } from '../services/dashboardApi'
+import type { DashboardData, PieChartData, AccountData } from '../services/dashboardApi'
 import './Dashboard.css'
 
 ChartJS.register(
@@ -36,8 +34,6 @@ interface DashboardProps {
 export function Dashboard({ onNavigate }: DashboardProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [pieChartData, setPieChartData] = useState<PieChartData | null>(null)
-  const [monthlySpending, setMonthlySpending] = useState<MonthlySpendingSummary | null>(null)
-  const [rewardsData, setRewardsData] = useState<RewardsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [incomeAnalysis, setIncomeAnalysis] = useState<any>(null);
   const [incomePrediction, setIncomePrediction] = useState<any>(null);
@@ -53,41 +49,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const API_BASE_URL = 'https://acrosporous-ligneous-raguel.ngrok-free.dev/api';
 
-  // Calculate quick stats using real monthly spending data
-  const getQuickStats = () => {
-    if (!monthlySpending) return null
-
-    const currentMonth = monthlySpending.currentMonth.totalSpent
-    const previousMonth = monthlySpending.previousMonth.totalSpent
-    const change = monthlySpending.comparison.spendingChange
-
-    return {
-      thisMonth: currentMonth,
-      lastMonth: previousMonth,
-      change: change,
-      isPositive: change >= 0,
-      currentMonthName: monthlySpending.currentMonth.month,
-      previousMonthName: monthlySpending.previousMonth.month,
-      currentYear: monthlySpending.currentMonth.year,
-      previousYear: monthlySpending.previousMonth.year
-    }
-  }
-
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true)
       try {
-        const [data, pieData, monthlyData, rewards, accounts] = await Promise.all([
+        const [data, pieData, accounts] = await Promise.all([
           fetchDashboardData(),
           fetchPieChartData(),
-          fetchMonthlySpendingSummary(),
-          fetchRewardsData(),
           fetchAccountsData(),
         ])
         setDashboardData(data)
         setPieChartData(pieData)
-        setMonthlySpending(monthlyData)
-        setRewardsData(rewards)
         setAccountsData(accounts)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
@@ -507,30 +479,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <h2>{getTimeBasedGreeting()}, Nhien! 👋</h2>
           <p>Here's your financial snapshot for today</p>
         </div>
-        {getQuickStats() && (
-          <div className="quick-stats">
-            <div className="stat-card">
-              <div className="stat-value spending-value">${getQuickStats()?.thisMonth.toFixed(2)}</div>
-              <div className="stat-label">
-                {getQuickStats()?.currentMonthName} {getQuickStats()?.currentYear} Spending
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className={`stat-value comparison-value ${getQuickStats()?.isPositive ? 'negative' : 'positive'}`}>
-                {getQuickStats()?.isPositive ? '+' : '-'}${Math.abs(getQuickStats()?.change || 0).toFixed(2)}
-              </div>
-              <div className="stat-label">
-                vs {getQuickStats()?.previousMonthName} {getQuickStats()?.previousYear}
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value percentage-value">
-                {rewardsData?.recommendedCards?.length || 0}
-              </div>
-              <div className="stat-label">Recommended Accounts</div>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="dashboard-content">
